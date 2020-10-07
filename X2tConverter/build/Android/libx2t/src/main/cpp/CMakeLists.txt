@@ -152,6 +152,10 @@ set(LIB_NAME_X2T ${ARG_NAME_LIB_X2T})
 set(LIB_NAME_XPSFILE ${ARG_NAME_LIB_XPSFILE})
 # fb2file lib
 set(LIB_NAME_FB2FILE ${ARG_NAME_LIB_FB2FILE})
+# icudata lib
+set(LIB_NAME_ICUDATA ${ARG_NAME_LIB_ICUDATA})
+# icuuc lib
+set(LIB_NAME_ICUUC ${ARG_NAME_LIB_ICUUC})
 # ---------- Paths sources  ----------
 # Core src dir path
 set(CORE_DIR ${ARG_PATH_SRC_CORE})
@@ -163,9 +167,11 @@ set(X2T_CONVERTER_DIR ${CORE_DIR}/X2tConverter)
 message(STATUS "X2t converter source path: ${X2T_DIR_CONVERTER}")
 
 # Prebuild libraries path
-set(LIBS_DIR ${ARG_PATH_LIB_BUILD_TOOLS})
-message(STATUS "Prebuild libraries path: ${LIBS_DIR}")
-set(X2T_CONVERTER_LIBS ${LIBS_DIR}/${ANDROID_ABI})
+set(LIBS_3DPARTY_DIR ${ARG_PATH_LIB_3D_PARTY})
+message(STATUS "Prebuild libraries path: ${LIBS_3DPARTY_DIR}")
+set(LIBS_BUILD_TOOLS_DIR ${ARG_PATH_LIB_BUILD_TOOLS})
+message(STATUS "Prebuild libraries path: ${LIBS_BUILD_TOOLS_DIR}")
+set(X2T_CONVERTER_LIBS ${LIBS_BUILD_TOOLS_DIR}/${ANDROID_ABI})
 message(STATUS "Prebuild libraries path: ${X2T_CONVERTER_LIBS}")
 # configure import libs
 set(X2T_CONVERTER_INCLUDE ${CORE_DIR}/X2tConverter/src/dylib
@@ -226,6 +232,16 @@ if (NOT EXISTS ${ICU_LIB_DIR})
     message(FATAL_ERROR "Icu path with .h files doesn't exist!")
 endif()]]
 
+set(LIB_NAME_ICU icu)
+
+# ICU src dir path
+set(ICU_INCLUDE_DIR ${LIBS_3DPARTY_DIR}/${LIB_NAME_ICU}/android/build/include/unicode)
+message(STATUS "ICU include path: ${ICU_INCLUDE_DIR}")
+
+if (NOT EXISTS ${ICU_INCLUDE_DIR})
+    message(FATAL_ERROR "ICU path with .h files doesn't exist!")
+endif()
+
 
 # Add global path for lib resources here
 # Workaround src dir path
@@ -285,6 +301,7 @@ add_compile_options(
 # Dir with headers
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}
+    ${ICU_INCLUDE_DIR}
    # ${ICONV_INCLUDE_DIR}
    # ${ICU_INCLUDE_DIR}
    # ${BOOST_INCLUDE_DIR}
@@ -369,6 +386,8 @@ add_library(${LIB_NAME_UNICODECONVERTER} SHARED IMPORTED)
 add_library(${LIB_NAME_X2T} SHARED IMPORTED)
 add_library(${LIB_NAME_XPSFILE} SHARED IMPORTED)
 add_library(${LIB_NAME_FB2FILE} SHARED IMPORTED)
+add_library(${LIB_NAME_ICUDATA} SHARED IMPORTED)
+add_library(${LIB_NAME_ICUUC} SHARED IMPORTED)
 
 # Export lib to common libs path
 set_target_properties(${LIB_NAME_X2T_CONVERTER}
@@ -404,6 +423,10 @@ set_target_properties(${LIB_NAME_XPSFILE} PROPERTIES IMPORTED_LOCATION
         ${X2T_CONVERTER_LIBS}/lib${LIB_NAME_XPSFILE}.so)
 set_target_properties(${LIB_NAME_FB2FILE} PROPERTIES IMPORTED_LOCATION
         ${X2T_CONVERTER_LIBS}/lib${LIB_NAME_FB2FILE}.so)
+set_target_properties(${LIB_NAME_ICUDATA} PROPERTIES IMPORTED_LOCATION
+        ${X2T_CONVERTER_LIBS}/lib${LIB_NAME_ICUDATA}.so.58)
+set_target_properties(${LIB_NAME_ICUUC} PROPERTIES IMPORTED_LOCATION
+        ${X2T_CONVERTER_LIBS}/lib${LIB_NAME_ICUUC}.so.58)
 
 # Add dependency library
 target_link_libraries(${LIB_NAME_X2T_CONVERTER}
@@ -421,6 +444,8 @@ target_link_libraries(${LIB_NAME_X2T_CONVERTER}
         ${LIB_NAME_X2T}
         ${LIB_NAME_XPSFILE}
         ${LIB_NAME_FB2FILE}
+        ${LIB_NAME_ICUDATA}
+        ${LIB_NAME_ICUUC}
 )
 
 # Add include files .h

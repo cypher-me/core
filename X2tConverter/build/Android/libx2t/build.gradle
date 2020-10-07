@@ -21,6 +21,7 @@ android {
                 arguments "-DANDROID_TOOLCHAIN=clang",
                           "-DANDROID_STL=c++_static",
                           "-DANDROID_ARM_NEON=TRUE",
+                          "-DARG_PATH_LIB_3D_PARTY=${getProjectPath(PATH_LIB_3D_PARTY, true)}",
                           "-DARG_PATH_LIB_BUILD_TOOLS=${getProjectPath(PATH_LIB_BUILD_TOOLS)}",
                           "-DARG_PATH_LIB_DST=${getProjectPath(PATH_LIB_DST, true)}",
                           "-DARG_PATH_SRC_CORE=${getProjectPath(PATH_SRC_CORE)}",
@@ -36,7 +37,9 @@ android {
                           "-DARG_NAME_LIB_UNICODECONVERTER=$NAME_LIB_UNICODECONVERTER",
                           "-DARG_NAME_LIB_X2T=$NAME_LIB_X2T",
                           "-DARG_NAME_LIB_XPSFILE=$NAME_LIB_XPSFILE",
-                          "-DARG_NAME_LIB_FB2FILE=$NAME_LIB_FB2FILE"
+                          "-DARG_NAME_LIB_FB2FILE=$NAME_LIB_FB2FILE",
+                          "-DARG_NAME_LIB_ICUDATA=$NAME_LIB_ICUDATA",
+                          "-DARG_NAME_LIB_ICUUC=$NAME_LIB_ICUUC"
             }
         }
 
@@ -99,6 +102,8 @@ android {
             pickFirst "lib/$abi/lib${NAME_LIB_X2T}.so"
             pickFirst "lib/$abi/lib${NAME_LIB_XPSFILE}.so"
             pickFirst "lib/$abi/lib${NAME_LIB_FB2FILE}.so"
+            pickFirst "lib/$abi/lib${NAME_LIB_ICUDATA}.so.58"
+            pickFirst "lib/$abi/lib${NAME_LIB_ICUUC}.so.58"
             pickFirst "lib/$abi/lib${NAME_LIB}.so"
         }
     }
