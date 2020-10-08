@@ -125,6 +125,11 @@ if (NOT DEFINED ARG_NAME_LIB_FB2FILE)
     message(FATAL_ERROR "You must set argument \"ARG_NAME_LIB_FB2FILE\" with fb2file lib name...")
 endif()
 
+# EpubFile library name
+if (NOT DEFINED ARG_NAME_LIB_EPUBFILE)
+    message(FATAL_ERROR "You must set argument \"ARG_NAME_LIB_EPUBFILE\" with EpubFile lib name...")
+endif()
+
 # ---------- Names ----------
 # X2tConverter lib
 set(LIB_NAME_X2T_CONVERTER ${ARG_NAME_LIB})
@@ -152,6 +157,8 @@ set(LIB_NAME_X2T ${ARG_NAME_LIB_X2T})
 set(LIB_NAME_XPSFILE ${ARG_NAME_LIB_XPSFILE})
 # fb2file lib
 set(LIB_NAME_FB2FILE ${ARG_NAME_LIB_FB2FILE})
+# EpubFile lib
+set(LIB_NAME_EPUBFILE ${ARG_NAME_LIB_EPUBFILE})
 # icudata lib
 set(LIB_NAME_ICUDATA ${ARG_NAME_LIB_ICUDATA})
 # icuuc lib
@@ -386,6 +393,7 @@ add_library(${LIB_NAME_UNICODECONVERTER} SHARED IMPORTED)
 add_library(${LIB_NAME_X2T} SHARED IMPORTED)
 add_library(${LIB_NAME_XPSFILE} SHARED IMPORTED)
 add_library(${LIB_NAME_FB2FILE} SHARED IMPORTED)
+add_library(${LIB_NAME_EPUBFILE} SHARED IMPORTED)
 add_library(${LIB_NAME_ICUDATA} SHARED IMPORTED)
 add_library(${LIB_NAME_ICUUC} SHARED IMPORTED)
 
@@ -423,6 +431,8 @@ set_target_properties(${LIB_NAME_XPSFILE} PROPERTIES IMPORTED_LOCATION
         ${X2T_CONVERTER_LIBS}/lib${LIB_NAME_XPSFILE}.so)
 set_target_properties(${LIB_NAME_FB2FILE} PROPERTIES IMPORTED_LOCATION
         ${X2T_CONVERTER_LIBS}/lib${LIB_NAME_FB2FILE}.so)
+set_target_properties(${LIB_NAME_EPUBFILE} PROPERTIES IMPORTED_LOCATION
+        ${X2T_CONVERTER_LIBS}/lib${LIB_NAME_EPUBFILE}.so)
 set_target_properties(${LIB_NAME_ICUDATA} PROPERTIES IMPORTED_LOCATION
         ${X2T_CONVERTER_LIBS}/lib${LIB_NAME_ICUDATA}.so.58)
 set_target_properties(${LIB_NAME_ICUUC} PROPERTIES IMPORTED_LOCATION
@@ -444,6 +454,7 @@ target_link_libraries(${LIB_NAME_X2T_CONVERTER}
         ${LIB_NAME_X2T}
         ${LIB_NAME_XPSFILE}
         ${LIB_NAME_FB2FILE}
+        ${LIB_NAME_EPUBFILE}
         ${LIB_NAME_ICUDATA}
         ${LIB_NAME_ICUUC}
 )
