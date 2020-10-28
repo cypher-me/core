@@ -75,7 +75,8 @@ namespace MetaFile
 			pCur    = pBuf;
 			pEnd    = pBuf + unSize + 1;
 		};
-		BYTE* GetCurPtr()
+
+                BYTE* GetCurPtr()
 		{
 			return pCur;
 		}

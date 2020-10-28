@@ -158,7 +158,7 @@ namespace MetaFile
 		{
 			CMetaFileRenderer oWmfOut(&m_oWmfFile, pRenderer, dX, dY, dWidth, dHeight);
 			m_oWmfFile.SetOutputDevice((IOutputDevice*)&oWmfOut);
-			m_oWmfFile.PlayMetaFile();
+            m_oWmfFile.PlayMetaFile();
 		}
 		else if (c_lMetaEmf == m_lType)
 		{
@@ -172,6 +172,11 @@ namespace MetaFile
 			m_oSvmFile.SetOutputDevice((IOutputDevice*)&oSvmOut);
 			m_oSvmFile.PlayMetaFile();
 		}
+        else if (c_lMetaWmfAndEmf == m_lType)
+        {
+            LOG_TRACE
+
+        }
         else if (c_lMetaSvg == m_lType)
         {
             m_oSvgFile.Draw(pRenderer, dX, dY, dWidth, dHeight);
@@ -292,4 +297,55 @@ namespace MetaFile
 		oFrame.SaveFile(wsOutFilePath, unFileType);
 		RELEASEINTERFACE(pFontManager);
 	}
+
+    void CMetaFile::ConvertToRaster()
+    {
+        CFontManager *pFontManager = (CFontManager*)m_pAppFonts->GenerateFontManager();
+        CFontsCache* pFontCache = new CFontsCache();
+        pFontCache->SetStreams(m_pAppFonts->GetStreams());
+        pFontManager->SetOwnerCache(pFontCache);
+
+        CGraphicsRenderer oRenderer;
+        oRenderer.SetFontManager(pFontManager);
+
+
+        double dX, dY, dW, dH;
+        GetBounds(&dX, &dY, &dW, &dH);
+
+        if (dW < 0)
+            dW = -dW;
+        if (dH < 0)
+            dH = -dH;
+
+        const int nWidth = (int)(dW * 96 / 25.4);
+        const int nHeight = (int)(dH * 96 / 25.4);
+
+        BYTE* pBgraData = new BYTE[nWidth * nHeight * 4];
+        if (!pBgraData)
+            return;
+
+        _UINT32 alfa = 0xffffff;
+        //дефолтный тон должен быть прозрачным, а не белым
+        //memset(pBgraData, 0xff, nWidth * nHeight * 4);
+        for (int i = 0; i < nWidth * nHeight; i++)
+        {
+            ((_UINT32*)pBgraData)[i] = alfa;
+        }
+        CBgraFrame oFrame;
+        oFrame.put_Data(pBgraData);
+        oFrame.put_Width(nWidth);
+        oFrame.put_Height(nHeight);
+        oFrame.put_Stride(-4 * nWidth);
+
+        oRenderer.CreateFromBgraFrame(&oFrame);
+        oRenderer.SetSwapRGB(false);
+        oRenderer.put_Width(nWidth);
+        oRenderer.put_Height(nHeight);
+
+        DrawOnRenderer(&oRenderer, 0, 0, nWidth, nHeight);
+
+//        oFrame.SaveFile(wsOutFilePath, unFileType);
+//        RELEASEINTERFACE(pFontManager);
+    }
+
 }

@@ -38,6 +38,7 @@
 #include "MetaFileClip.h"
 #include "../../../fontengine/FontManager.h"
 
+#include <iostream>
 namespace MetaFile
 {
 	class IMetaFileBase
@@ -55,7 +56,7 @@ namespace MetaFile
 			this->Close();
 		}
 		
-		virtual void         PlayMetaFile() = 0;
+                virtual void         PlayMetaFile() = 0;
 		virtual void         ClearFile() {/*Нельзя делать чисто виртуальной, потому что вызывается в деструкторе*/}
 		virtual TRect*       GetDCBounds() = 0;
 		virtual double       GetPixelHeight() = 0;
@@ -107,11 +108,11 @@ namespace MetaFile
 
 			this->ClearFile();
 		}
-		void          Scan()
+                void          Scan()
 		{
 			IOutputDevice* pOutput = m_pOutput;
 			m_pOutput = NULL;
-			PlayMetaFile();
+                        PlayMetaFile();
 			m_pOutput = pOutput;
 
 			this->ClearFile();

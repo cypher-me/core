@@ -69,7 +69,7 @@ class CSvmFile : virtual public IMetaFileBase
 	 };
 
 
-	void PlayMetaFile();
+        void PlayMetaFile();
 	void ClearFile()
 	{
 		m_oPlayer.Clear();

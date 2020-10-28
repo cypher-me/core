@@ -43,6 +43,18 @@
 #undef DrawText
 #endif
 
+#ifdef _DEBUG
+#define LOG_TRACE std::wcout << "Entering: " << __FUNCTION__ << std::endl;
+#else
+#define LOG_TRACE
+#endif
+
+#ifdef _DEBUG
+#define LOGGING(_value) std::wcout << _value << std::endl;
+#else
+#define LOGGING
+#endif
+
 namespace MetaFile
 {
 static const struct ActionNamesEmf
@@ -175,13 +187,13 @@ static const struct ActionNamesEmf
 {	EMR_COLORMATCHTOTARGETW,	L"EMR_COLORMATCHTOTARGETW"},
 {	EMR_CREATECOLORSPACEW,		L"EMR_CREATECOLORSPACEW	"}
 };
-	void CEmfFile::PlayMetaFile()
+    void CEmfFile::PlayMetaFile()
 	{
+        LOG_TRACE
 		if (!m_oStream.IsValid())
 			SetError();
 
 		unsigned int ulSize, ulType;
-		unsigned int ulNumber = 0;
 
 		bool bEof = false;
 
@@ -363,8 +375,8 @@ static const struct ActionNamesEmf
 
 		} while (!CheckError());
 
-		if (!CheckError())
-			m_oStream.SeekToStart();
+        if (!CheckError())
+            m_oStream.SeekToStart();
 
 		if (m_pOutput)
 			m_pOutput->End();
@@ -711,6 +723,7 @@ static const struct ActionNamesEmf
 
 	void CEmfFile::Read_EMR_HEADER()
 	{
+        LOG_TRACE
 		m_oStream >> m_oHeader.oBounds;
 		m_oStream >> m_oHeader.oFrame;
 		m_oStream >> m_oHeader.ulSignature;
@@ -755,6 +768,7 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_ALPHABLEND()
 	{
+        LOG_TRACE
 		TEmfAlphaBlend oBitmap;
 		m_oStream >> oBitmap;
 
@@ -799,6 +813,7 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_STRETCHDIBITS()
 	{
+        LOG_TRACE
 		TEmfStretchDIBITS oBitmap;
 		m_oStream >> oBitmap;
 
@@ -819,6 +834,7 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_BITBLT()
 	{
+        LOG_TRACE
 		TEmfBitBlt oBitmap;
 		m_oStream >> oBitmap;
 
@@ -917,6 +933,7 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_SETDIBITSTODEVICE()
 	{
+        LOG_TRACE
 		TEmfSetDiBitsToDevice oBitmap;
 		m_oStream >> oBitmap;
 
@@ -933,6 +950,7 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_STRETCHBLT()
 	{
+        LOG_TRACE
 		TEmfStretchBLT oBitmap;
 		m_oStream >> oBitmap;
 
@@ -954,6 +972,7 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_EOF()
 	{
+        LOG_TRACE
 		unsigned int ulCount, ulOffset, ulSizeLast;
 
 		m_oStream >> ulCount;
@@ -965,15 +984,18 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_UNKNOWN()
 	{
+        LOG_TRACE
 		// Неизвестные и нереализованные записи мы пропускаем
 		m_oStream.Skip(m_ulRecordSize);
 	}
 	void CEmfFile::Read_EMR_SAVEDC()
 	{
+        LOG_TRACE
 		m_pDC = m_oPlayer.SaveDC();
 	}
 	void CEmfFile::Read_EMR_RESTOREDC()
 	{
+        LOG_TRACE
 		int lSavedDC;
 		m_oStream >> lSavedDC;
 
@@ -992,6 +1014,7 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_MODIFYWORLDTRANSFORM()
 	{
+        LOG_TRACE
 		TEmfXForm oXForm;
 		unsigned int ulMode;
 
@@ -1003,6 +1026,7 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_SETWORLDTRANSFORM()
 	{
+        LOG_TRACE
 		TEmfXForm oXForm;
 
 		m_oStream >> oXForm;
@@ -1012,6 +1036,7 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_CREATEBRUSHINDIRECT()
 	{
+        LOG_TRACE
 		unsigned int ulBrushIndex;
 		CEmfLogBrushEx* pBrush = new CEmfLogBrushEx();
 		if (!pBrush)
@@ -1024,6 +1049,7 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_SETTEXTCOLOR()
 	{
+        LOG_TRACE
 		TEmfColor oColor;
 		m_oStream >> oColor;
 
@@ -1032,6 +1058,7 @@ static const struct ActionNamesEmf
 	}		
 	void CEmfFile::Read_EMR_SELECTOBJECT()
 	{
+        LOG_TRACE
 		unsigned int ulObjectIndex;
 		m_oStream >> ulObjectIndex;
 
@@ -1040,6 +1067,7 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_EXTCREATEFONTINDIRECTW()
 	{
+        LOG_TRACE
 		unsigned int unSize = m_ulRecordSize - 4;
 		bool bFixedLength = unSize <= 0x0140 ? true : false;
 
@@ -1055,6 +1083,7 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_SETTEXTALIGN()
 	{
+        LOG_TRACE
 		unsigned int ulAlign;
 		m_oStream >> ulAlign;
 
@@ -1063,6 +1092,7 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_SETBKMODE()
 	{
+        LOG_TRACE
 		unsigned int ulBgMode;
 		m_oStream >> ulBgMode;
 		m_pDC->SetBgMode(ulBgMode);
@@ -1070,6 +1100,7 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_DELETEOBJECT()
 	{
+        LOG_TRACE
 		unsigned int ulIndex;
 		m_oStream >> ulIndex;
 		m_oPlayer.DeleteObject(ulIndex);
@@ -1077,6 +1108,7 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_SETMITERLIMIT()
 	{
+        LOG_TRACE
 		unsigned int ulMiterLimit;
 		m_oStream >> ulMiterLimit;
 		m_pDC->SetMiterLimit(ulMiterLimit);
@@ -1084,6 +1116,7 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_EXTCREATEPEN()
 	{
+        LOG_TRACE
 		unsigned int ulPenIndex;
 		m_oStream >> ulPenIndex;
 
@@ -1134,6 +1167,7 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_CREATEPEN()
 	{
+        LOG_TRACE
 		unsigned int ulPenIndex;
 		m_oStream >> ulPenIndex;
 		CEmfLogPen* pPen = new CEmfLogPen();
@@ -1156,6 +1190,7 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_SETPOLYFILLMODE()
 	{
+        LOG_TRACE
 		unsigned int ulFillMode;
 		m_oStream >> ulFillMode;
 		m_pDC->SetFillMode(ulFillMode);
@@ -1163,6 +1198,7 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_BEGINPATH()
 	{
+        LOG_TRACE
 		if (m_pPath)
 			delete m_pPath;
 
@@ -1178,10 +1214,12 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_ENDPATH()
 	{
+        LOG_TRACE
 		// Ничего не делаем
 	}
 	void CEmfFile::Read_EMR_CLOSEFIGURE()
 	{
+        LOG_TRACE
 		if (m_pPath)
 		{
 			if (!m_pPath->Close())
@@ -1190,14 +1228,17 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_FLATTENPATH()
 	{
+        LOG_TRACE
 		// Ничего не делаем
 	}
 	void CEmfFile::Read_EMR_WIDENPATH()
 	{
+        LOG_TRACE
 		// TODO: реализовать
 	}
 	void CEmfFile::Read_EMR_ABORTPATH()
 	{
+        LOG_TRACE
 		if (m_pPath)
 		{
 			delete m_pPath;
@@ -1206,12 +1247,14 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_MOVETOEX()
 	{
+        LOG_TRACE
 		TEmfPointL oPoint;
 		m_oStream >> oPoint;
 		MoveTo(oPoint);
 	}	
 	void CEmfFile::Read_EMR_SETARCDIRECTION()
 	{
+        LOG_TRACE
 		unsigned int unDirection;
 		m_oStream >> unDirection;
 		m_pDC->SetArcDirection(unDirection);
@@ -1219,6 +1262,7 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_FILLPATH()
 	{
+        LOG_TRACE
 		TEmfRectL oBounds;
 		m_oStream >> oBounds;
 
@@ -1230,6 +1274,7 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_SETMAPMODE()
 	{
+        LOG_TRACE
 		unsigned int ulMapMode;
 		m_oStream >> ulMapMode;
 
@@ -1237,41 +1282,48 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_SETWINDOWORGEX()
 	{
+        LOG_TRACE
 		TEmfPointL oOrigin;
 		m_oStream >> oOrigin;
 		m_pDC->SetWindowOrigin(oOrigin);
 	}
 	void CEmfFile::Read_EMR_SETWINDOWEXTEX()
 	{
+        LOG_TRACE
 		TEmfSizeL oExtent;
 		m_oStream >> oExtent;
 		m_pDC->SetWindowExtents(oExtent);
 	}
 	void CEmfFile::Read_EMR_SETVIEWPORTORGEX()
 	{
+        LOG_TRACE
 		TEmfPointL oOrigin;
 		m_oStream >> oOrigin;
 		m_pDC->SetViewportOrigin(oOrigin);
 	}
 	void CEmfFile::Read_EMR_SETVIEWPORTEXTEX()
 	{
+        LOG_TRACE
 		TEmfSizeL oExtent;
 		m_oStream >> oExtent;
 		m_pDC->SetViewportExtents(oExtent);
 	}
 	void CEmfFile::Read_EMR_SETSTRETCHBLTMODE()
 	{
+        LOG_TRACE
 		unsigned int ulStretchMode;
 		m_oStream >> ulStretchMode;
 		m_pDC->SetStretchMode(ulStretchMode);
 	}
 	void CEmfFile::Read_EMR_SETICMMODE()
 	{
+        LOG_TRACE
 		unsigned int ulICMMode;
 		m_oStream >> ulICMMode;
 	}
 	void CEmfFile::Read_EMR_CREATEDIBPATTERNBRUSHPT()
 	{
+        LOG_TRACE
 		unsigned int ulBrushIndex;
 		TEmfDibPatternBrush oDibBrush;
 		m_oStream >> ulBrushIndex;
@@ -1292,6 +1344,7 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_SELECTCLIPPATH()
 	{
+        LOG_TRACE
 		unsigned int unRegionMode;
 		m_oStream >> unRegionMode;
 
@@ -1305,6 +1358,7 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_SETBKCOLOR()
 	{
+        LOG_TRACE
 		TEmfColor oColor;
 		m_oStream >> oColor;
 		m_pDC->SetBgColor(oColor);
@@ -1312,6 +1366,7 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_EXCLUDECLIPRECT()
 	{
+        LOG_TRACE
 		// TODO: Проверить как найдется файл
 		TEmfRectL oClip;
 		m_oStream >> oClip;
@@ -1354,6 +1409,7 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_EXTSELECTCLIPRGN()
 	{
+        LOG_TRACE
 		unsigned int ulRgnDataSize, ulRegionMode;
 		m_oStream >> ulRgnDataSize >> ulRegionMode;
 
@@ -1365,11 +1421,13 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_SETMETARGN()
 	{
+        LOG_TRACE
 		m_pDC->GetClip()->Reset();
 		UpdateOutputDC();
 	}		
 	void CEmfFile::Read_EMR_SETROP2()
 	{
+        LOG_TRACE
 		unsigned int ulRop2Mode;
 		m_oStream >> ulRop2Mode;
 		m_pDC->SetRop2Mode(ulRop2Mode);
@@ -1377,6 +1435,7 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_CREATEPALETTE()
 	{
+        LOG_TRACE
 		unsigned int ulPaletteIndex;
 		CEmfLogPalette* pPalette = new CEmfLogPalette();
 		if (!pPalette)
@@ -1388,16 +1447,19 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_SELECTPALETTE()
 	{
+        LOG_TRACE
 		unsigned int ulIndex;
 		m_oStream >> ulIndex;
 		m_oPlayer.SelectPalette(ulIndex);
 	}
 	void CEmfFile::Read_EMR_REALIZEPALETTE()
 	{
+        LOG_TRACE
 		// TODO: Реализовать
 	}
 	void CEmfFile::Read_EMR_INTERSECTCLIPRECT()
 	{
+        LOG_TRACE
 		TEmfRectL oClip;
 		m_oStream >> oClip;
 
@@ -1408,6 +1470,7 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_SETLAYOUT()
 	{
+        LOG_TRACE
 		unsigned int ulLayoutMode;
 		m_oStream >> ulLayoutMode;
 
@@ -1415,6 +1478,7 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_SETBRUSHORGEX()
 	{
+        LOG_TRACE
 		TEmfPointL oOrigin;
 		m_oStream >> oOrigin;
 
@@ -1422,6 +1486,7 @@ static const struct ActionNamesEmf
 	}		
 	void CEmfFile::Read_EMR_ANGLEARC()
 	{
+        LOG_TRACE
 		// TODO: Как найдутся файлы проверить данную запись.
 		TEmfPointL oCenter;
 		unsigned int unRadius;
@@ -1433,6 +1498,7 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_ARC_BASE(TEmfRectL& oBox, TEmfPointL& oStart, TEmfPointL& oEnd, double& dStartAngle, double& dSweepAngle)
 	{
+        LOG_TRACE
 		m_oStream >> oBox >> oStart >> oEnd;
 
 		dStartAngle = GetEllipseAngle(oBox.lLeft, oBox.lTop, oBox.lRight, oBox.lBottom, oStart.x, oStart.y);
@@ -1450,6 +1516,7 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_ARC()
 	{
+        LOG_TRACE
 		TEmfRectL oBox;
 		TEmfPointL oStart, oEnd;
 		double dStartAngle, dSweep;
@@ -1461,6 +1528,7 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_ARCTO()
 	{
+        LOG_TRACE
 		// TODO: Как найдутся файлы проверить данную запись.
 		TEmfRectL oBox;
 		TEmfPointL oStart, oEnd;
@@ -1471,6 +1539,7 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_CHORD()
 	{
+        LOG_TRACE
 		// TODO: Как найдутся файлы проверить данную запись.
 		TEmfRectL oBox;
 		TEmfPointL oStart, oEnd;
@@ -1484,6 +1553,7 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_ELLIPSE()
 	{
+        LOG_TRACE
 		TEmfRectL oBox;
 		m_oStream >> oBox;
 		ArcTo(oBox.lLeft, oBox.lTop, oBox.lRight, oBox.lBottom, 0, 360);
@@ -1491,6 +1561,7 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_EXTTEXTOUTA()
 	{
+        LOG_TRACE
 		// TODO: Как найдутся файлы проверить данную запись.
 		TEmfExtTextoutA oText;
 		m_oStream >> oText;	
@@ -1499,18 +1570,21 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_EXTTEXTOUTW()
 	{
+        LOG_TRACE
 		TEmfExtTextoutW oText;
 		m_oStream >> oText;
 		DrawTextW(oText.wEmrText, oText.iGraphicsMode);
 	}
 	void CEmfFile::Read_EMR_LINETO()
 	{
+        LOG_TRACE
 		TEmfPointL oPoint;
 		m_oStream >> oPoint;
 		LineTo(oPoint);
 	}
 	void CEmfFile::Read_EMR_PIE()
 	{
+        LOG_TRACE
 		// TODO: Как найдутся файлы проверить данную запись.
 		TEmfRectL oBox;
 		TEmfPointL oStart, oEnd;
@@ -1524,14 +1598,17 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_POLYBEZIER()
 	{
+        LOG_TRACE
 		Read_EMR_POLYBEZIER_BASE<TEmfPointL>();
 	}
 	void CEmfFile::Read_EMR_POLYBEZIER16()
 	{
+        LOG_TRACE
 		Read_EMR_POLYBEZIER_BASE<TEmfPointS>();
 	}
 	template<typename T>void CEmfFile::Read_EMR_POLYBEZIER_BASE()
 	{
+        LOG_TRACE
 		TEmfRectL oBounds;
 		m_oStream >> oBounds;
 
@@ -1555,14 +1632,17 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_POLYBEZIERTO()
 	{
+        LOG_TRACE
 		Read_EMR_POLYBEZIERTO_BASE<TEmfPointL>();
 	}
 	void CEmfFile::Read_EMR_POLYBEZIERTO16()
 	{
+        LOG_TRACE
 		Read_EMR_POLYBEZIERTO_BASE<TEmfPointS>();
 	}
 	template<typename T>void CEmfFile::Read_EMR_POLYBEZIERTO_BASE()
 	{
+        LOG_TRACE
 		TEmfRectL oBounds;
 		m_oStream >> oBounds;
 
@@ -1581,14 +1661,17 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_POLYDRAW()
 	{
+        LOG_TRACE
 		Read_EMR_POLYDRAW_BASE<TEmfPointL>();
 	}
 	void CEmfFile::Read_EMR_POLYDRAW16()
 	{
+        LOG_TRACE
 		Read_EMR_POLYDRAW_BASE<TEmfPointS>();
 	}
 	template<typename T>void CEmfFile::Read_EMR_POLYDRAW_BASE()
 	{
+        LOG_TRACE
 		// TODO: Как найдутся файлы проверить данную запись.
 		//bug #35006 - не прочитывается весь рекорд ... выравнивание?
 
@@ -1673,14 +1756,17 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_POLYGON()
 	{
+        LOG_TRACE
 		Read_EMR_POLYGON_BASE<TEmfPointL>();
 	}
 	void CEmfFile::Read_EMR_POLYGON16()
 	{
+        LOG_TRACE
 		Read_EMR_POLYGON_BASE<TEmfPointS>();
 	}
 	template<typename T>void CEmfFile::Read_EMR_POLYGON_BASE()
 	{
+        LOG_TRACE
 		TEmfRectL oBounds;
 		m_oStream >> oBounds;
 		unsigned int ulCount;
@@ -1702,14 +1788,17 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_POLYLINE()
 	{
+        LOG_TRACE
 		Read_EMR_POLYLINE_BASE<TEmfPointL>();
 	}
 	void CEmfFile::Read_EMR_POLYLINE16()
 	{
+        LOG_TRACE
 		Read_EMR_POLYLINE_BASE<TEmfPointS>();
 	}
 	template<typename T>void CEmfFile::Read_EMR_POLYLINE_BASE()
 	{
+        LOG_TRACE
 		TEmfRectL oBounds;
 		m_oStream >> oBounds;
 		unsigned int ulCount;
@@ -1732,14 +1821,17 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_POLYLINETO()
 	{
+        LOG_TRACE
 		Read_EMR_POLYLINETO_BASE<TEmfPointL>();
 	}
 	void CEmfFile::Read_EMR_POLYLINETO16()
 	{
+        LOG_TRACE
 		Read_EMR_POLYLINETO_BASE<TEmfPointS>();
 	}
 	template<typename T>void CEmfFile::Read_EMR_POLYLINETO_BASE()
 	{
+        LOG_TRACE
 		TEmfRectL oBounds;
 		m_oStream >> oBounds;
 
@@ -1755,14 +1847,17 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_POLYPOLYGON()
 	{
+        LOG_TRACE
 		Read_EMR_POLYPOLYGON_BASE<TEmfPointL>();
 	}
 	void CEmfFile::Read_EMR_POLYPOLYGON16()
 	{
+        LOG_TRACE
 		Read_EMR_POLYPOLYGON_BASE<TEmfPointS>();			
 	}
 	template<typename T>void CEmfFile::Read_EMR_POLYPOLYGON_BASE()
 	{
+        LOG_TRACE
 		TEmfRectL oBounds;
 		m_oStream >> oBounds;
 		unsigned int ulNumberOfPolygons;
@@ -1810,14 +1905,17 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_POLYPOLYLINE()
 	{
+        LOG_TRACE
 		Read_EMR_POLYPOLYLINE_BASE<TEmfPointL>();
 	}
 	void CEmfFile::Read_EMR_POLYPOLYLINE16()
 	{
+        LOG_TRACE
 		Read_EMR_POLYPOLYLINE_BASE<TEmfPointS>();
 	}
 	template<typename T>void CEmfFile::Read_EMR_POLYPOLYLINE_BASE()
 	{
+        LOG_TRACE
 		TEmfRectL oBounds;
 		m_oStream >> oBounds;
 
@@ -1867,6 +1965,7 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_POLYTEXTOUTA()
 	{
+        LOG_TRACE
 		// TODO: Как найдутся файлы проверить данную запись.
 		TEmfPolyTextoutA oText;
 		m_oStream >> oText;
@@ -1884,6 +1983,7 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_POLYTEXTOUTW()
 	{
+        LOG_TRACE
 		// TODO: Как найдутся файлы проверить данную запись.
 		TEmfPolyTextoutW oText;
 		m_oStream >> oText;
@@ -1901,6 +2001,7 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_RECTANGLE()
 	{
+        LOG_TRACE
 		TEmfRectL oBox;
 		m_oStream >> oBox;
 
@@ -1923,6 +2024,7 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_ROUNDRECT()
 	{
+        LOG_TRACE
 		TEmfRectL oBox;
 		TEmfSizeL oCorner;
 		m_oStream >> oBox >> oCorner;
@@ -1963,6 +2065,7 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_SETPIXELV()
 	{
+        LOG_TRACE
 		TEmfPointL oPoint;
 		TEmfColor oColor;
 
@@ -1980,6 +2083,7 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_SMALLTEXTOUT()
 	{
+        LOG_TRACE
 		TEmfSmallTextout oText;
 		m_oStream >> oText;
 
@@ -2009,6 +2113,7 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_STROKEANDFILLPATH()
 	{
+        LOG_TRACE
 		TEmfRectL oBounds;
 		m_oStream >> oBounds;
 		if (m_pOutput && m_pPath)
@@ -2019,6 +2124,7 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_STROKEPATH()
 	{
+        LOG_TRACE
 		TEmfRectL oBounds;
 		m_oStream >> oBounds;
 		if (m_pOutput && m_pPath)

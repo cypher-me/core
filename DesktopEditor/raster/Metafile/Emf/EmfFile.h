@@ -54,6 +54,11 @@ namespace MetaFile
 			m_pDC   = m_oPlayer.GetDC();
 		}
 
+                void SetStream(BYTE* pBuf, unsigned int unSize)
+                {
+                    m_oStream.SetStream(pBuf, unSize);
+                }
+
 		~CEmfFile()
 		{
 			ClearFile();
@@ -64,7 +69,7 @@ namespace MetaFile
 			//return &m_oHeader.oFrame;
 			return &m_oHeader.oFramePx;
 		}		
-		void PlayMetaFile();
+                void PlayMetaFile();
 		void ClearFile()
 		{
 			RELEASEOBJECT(m_pPath);
