@@ -38,6 +38,8 @@
 #include "../../../raster/BgraFrame.h"
 #include "../../../common/Directory.h"
 
+#include <iostream>
+
 int main(int argc, char *argv[])
 {
     // Check system fonts
@@ -50,9 +52,12 @@ int main(int argc, char *argv[])
 
     NSFonts::IApplicationFonts* pFonts = oWorker.Check();
 
+    const std::wstring sPathInputFile = NSFile::GetProcessDirectory() + L"/../../../files/wmf/example.wmf";
+    const std::wstring sPathOutputFile = NSFile::GetProcessDirectory() + L"/../../../files/wmf/sample-text.png";
+
     MetaFile::IMetaFile* pMetafile = MetaFile::Create(pFonts);
-    pMetafile->LoadFromFile(L"PATH_TO_METAFILE");
-    pMetafile->ConvertToRaster(L"PATH_TO_RASTER", 4, 1000);
+    pMetafile->LoadFromFile(sPathInputFile.c_str());
+    pMetafile->ConvertToRaster(sPathOutputFile.c_str(), 4, 750);
     pMetafile->Release();
 
     pFonts->Release();

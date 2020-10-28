@@ -38,6 +38,8 @@
 
 #include "Common/MetaFileRenderer.h"
 
+#include <iostream>
+
 namespace MetaFile
 {
 	IMetaFile* Create(NSFonts::IApplicationFonts *pAppFonts)
@@ -259,12 +261,9 @@ namespace MetaFile
 			if (dH < 0)
 				dH = -dH;
 
-            if (nWidth < 0) nWidth = (int)(dW * 96 / 25.4);
-			nHeight = (int)((double)nWidth * dH / dW);
-		}
-
-        double dWidth  = 25.4 * nWidth / 96;
-        double dHeight = 25.4 * nHeight / 96;
+            nWidth = (int)(dW * 96 / 25.4);
+            nHeight = (int)(dH * 96 / 25.4);
+        }
 
 		BYTE* pBgraData = new BYTE[nWidth * nHeight * 4];
 		if (!pBgraData)
@@ -280,15 +279,15 @@ namespace MetaFile
 		CBgraFrame oFrame;
 		oFrame.put_Data(pBgraData);
         oFrame.put_Width(nWidth);
-		oFrame.put_Height(nHeight);
-		oFrame.put_Stride(-4 * nWidth);
+        oFrame.put_Height(nHeight);
+        oFrame.put_Stride(-4 * nWidth);
 
 		oRenderer.CreateFromBgraFrame(&oFrame);
 		oRenderer.SetSwapRGB(false);
-		oRenderer.put_Width(dWidth);
-		oRenderer.put_Height(dHeight);
+        oRenderer.put_Width(nWidth);
+        oRenderer.put_Height(nHeight);
 
-		DrawOnRenderer(&oRenderer, 0, 0, dWidth, dHeight);
+        DrawOnRenderer(&oRenderer, 0, 0, nWidth, nHeight);
 
 		oFrame.SaveFile(wsOutFilePath, unFileType);
 		RELEASEINTERFACE(pFontManager);

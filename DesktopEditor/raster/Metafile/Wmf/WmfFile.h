@@ -38,12 +38,27 @@
 #include "../Common/IOutputDevice.h"
 #include "../Common/MetaFile.h"
 
+#include "../Emf/EmfFile.h"
+
 #include "WmfTypes.h"
 #include "WmfPlayer.h"
 
 #include <cmath>
+#include <iostream>
 
 #undef DrawText
+
+#ifdef _DEBUG
+#define LOG_TRACE std::wcout << "Entering: " << __FUNCTION__ << std::endl;
+#else
+#define LOG_TRACE
+#endif
+
+#ifdef _DEBUG
+#define LOGGING(_value) std::wcout << _value << std::endl;
+#else
+#define LOGGING
+#endif
 
 namespace MetaFile
 {
@@ -771,9 +786,11 @@ namespace MetaFile
 
 		void Read_META_UNKNOWN()
 		{
-		}
+                    LOG_TRACE
+                }
 		void Read_META_UNSUPPORTED()
 		{
+                    LOG_TRACE
 			// META_EXTFLOODFILL
 			// META_FLOODFILL
 
@@ -785,7 +802,8 @@ namespace MetaFile
 		}
 		void Read_META_HEADER()
 		{
-			m_oStream >> m_oPlaceable.Key;
+                    LOG_TRACE
+                        m_oStream >> m_oPlaceable.Key;
 			if (0x9AC6CDD7 == m_oPlaceable.Key)
 			{
 				m_oStream >> m_oPlaceable.HWmf;
@@ -843,6 +861,7 @@ namespace MetaFile
 		}
 		void Read_META_BITBLT()
 		{
+                    LOG_TRACE
 			TWmfBitBlt oBitmap;
 			m_oStream >> oBitmap;
 
@@ -875,6 +894,7 @@ namespace MetaFile
 		}
 		void Read_META_DIBBITBLT()
 		{
+                    LOG_TRACE
 			TWmfBitBlt oBitmap;
 			m_oStream >> oBitmap;
 
@@ -891,6 +911,7 @@ namespace MetaFile
 		}
 		void Read_META_DIBSTRETCHBLT()
 		{
+                    LOG_TRACE
 			TWmfStretchBlt oBitmap;
 			m_oStream >> oBitmap;
 
@@ -908,6 +929,7 @@ namespace MetaFile
 		}
 		void Read_META_SETDIBTODEV()
 		{
+                    LOG_TRACE
 			TWmfSetDibToDev oBitmap;
 			m_oStream >> oBitmap;
 
@@ -916,6 +938,7 @@ namespace MetaFile
 		}
 		void Read_META_STRETCHBLT()
 		{
+                    LOG_TRACE
 			TWmfStretchBlt oBitmap;
 			m_oStream >> oBitmap;
 
@@ -948,6 +971,7 @@ namespace MetaFile
 		}
 		void Read_META_STRETCHDIB()
 		{
+                    LOG_TRACE
 			TWmfStretchDib oBitmap;
 			m_oStream >> oBitmap;
 
@@ -955,6 +979,7 @@ namespace MetaFile
 		}
 		void Read_META_ARC()
 		{
+                    LOG_TRACE
 			short shYEndArc, shXEndArc, shYStartArc, shXStartArc, shBottom, shRight, shTop, shLeft;
 			m_oStream >> shYEndArc >> shXEndArc >> shYStartArc >> shXStartArc >> shBottom >> shRight >> shTop >> shLeft;
 			double dStartAngle = GetEllipseAngle((int)shLeft, (int)shTop, (int)shRight, (int)shBottom, (int)shXStartArc, (int)shYStartArc);
@@ -968,6 +993,7 @@ namespace MetaFile
 		}
 		void Read_META_CHORD()
 		{
+                    LOG_TRACE
 			short shYEndArc, shXEndArc, shYStartArc, shXStartArc, shBottom, shRight, shTop, shLeft;
 			m_oStream >> shYEndArc >> shXEndArc >> shYStartArc >> shXStartArc >> shBottom >> shRight >> shTop >> shLeft;
 			double dStartAngle = GetEllipseAngle((int)shLeft, (int)shTop, (int)shRight, (int)shBottom, (int)shXStartArc, (int)shYStartArc);
@@ -982,6 +1008,7 @@ namespace MetaFile
 		}
 		void Read_META_ELLIPSE()
 		{
+                    LOG_TRACE
 			short shBottom, shRight, shTop, shLeft;
 			m_oStream >> shBottom >> shRight >> shTop >> shLeft;
 			ArcTo(shLeft, shTop, shRight, shBottom, 0, 360);
@@ -990,6 +1017,7 @@ namespace MetaFile
 		}
 		void Read_META_EXTTEXTOUT()
 		{
+                    LOG_TRACE
 			short shY, shX, shStringLength;
 			unsigned short ushFwOptions;
 			TWmfRect oRectangle;
@@ -1045,12 +1073,14 @@ namespace MetaFile
 		}
 		void Read_META_FILLREGION()
 		{
+                    LOG_TRACE
 			unsigned short ushRegionIndex, ushBrushIndex;
 			m_oStream >> ushRegionIndex >> ushBrushIndex;
 			// TODO: Реализовать регионы
 		}
 		void Read_META_FRAMEREGION()
 		{
+                    LOG_TRACE
 			unsigned short ushRegionIndex, ushBrushIndex;
 			short shHeight, shWidth;
 			m_oStream >> ushRegionIndex >> ushBrushIndex >> shHeight >> shWidth;
@@ -1058,12 +1088,14 @@ namespace MetaFile
 		}
 		void Read_META_INVERTREGION()
 		{
+                    LOG_TRACE
 			unsigned short ushRegionIndex;
 			m_oStream >> ushRegionIndex;
 			// TODO: Реализовать регионы
 		}
 		void Read_META_LINETO()
 		{
+                    LOG_TRACE
 			short shY, shX;
 			m_oStream >> shY >> shX;
 			LineTo(shX, shY);
@@ -1071,12 +1103,14 @@ namespace MetaFile
 		}
 		void Read_META_PAINTREGION()
 		{
+                    LOG_TRACE
 			unsigned short ushRegionIndex;
 			m_oStream >> ushRegionIndex;
 			// TODO: Реализовать регионы
 		}
 		void Read_META_PATBLT()
 		{
+                    LOG_TRACE
 			unsigned int unRasterOperation;
 			short shX, shY, shW, shH;
 			m_oStream >> unRasterOperation >> shH >> shW >> shY >> shX;
@@ -1092,6 +1126,7 @@ namespace MetaFile
 		}
 		void Read_META_PIE()
 		{
+                    LOG_TRACE
 			short shXRadial1, shYRadial1, shXRadial2, shYRadial2;
 			short shL, shT, shR, shB;
 			m_oStream >> shYRadial2 >> shXRadial2 >> shYRadial1 >> shXRadial1;
@@ -1111,6 +1146,7 @@ namespace MetaFile
 		}
 		void Read_META_POLYLINE()
 		{
+                    LOG_TRACE
 			short shNumberOfPoints;
 			m_oStream >> shNumberOfPoints;
 			if (shNumberOfPoints < 1)
@@ -1129,6 +1165,7 @@ namespace MetaFile
 		}
 		void Read_META_POLYGON()
 		{
+                    LOG_TRACE
 			short shNumberOfPoints;
 			m_oStream >> shNumberOfPoints;
 			if (shNumberOfPoints < 1)
@@ -1148,6 +1185,7 @@ namespace MetaFile
 		}
 		void Read_META_POLYPOLYGON()
 		{
+                    LOG_TRACE
 			unsigned short ushNumberOfPolygons;
 			m_oStream >> ushNumberOfPolygons;
 			if (ushNumberOfPolygons <= 0)
@@ -1185,6 +1223,7 @@ namespace MetaFile
 		}
 		void Read_META_RECTANGLE()
 		{
+                    LOG_TRACE
 			short shL, shT, shR, shB;
 			m_oStream >> shB >> shR >> shT >> shL;
 
@@ -1199,6 +1238,7 @@ namespace MetaFile
 		}
 		void Read_META_ROUNDRECT()
 		{
+                    LOG_TRACE
 			short shL, shT, shR, shB, shW, shH;
 			m_oStream >> shH >> shW >> shB >> shR >> shT >> shL;
 
@@ -1216,6 +1256,7 @@ namespace MetaFile
 		}
 		void Read_META_SETPIXEL()
 		{
+                    LOG_TRACE
 			TWmfColor oColor;
 			short shX, shY;
 			m_oStream >> oColor >> shY >> shX;
@@ -1231,6 +1272,7 @@ namespace MetaFile
 		}
 		void Read_META_TEXTOUT()
 		{
+                    LOG_TRACE
 			short shStringLength;
 			m_oStream >> shStringLength;
 
@@ -1254,6 +1296,7 @@ namespace MetaFile
 		}
 		void Read_META_CREATEBRUSHINDIRECT()
 		{
+                    LOG_TRACE
 			TWmfLogBrush oLogBrush;
 			m_oStream >> oLogBrush;
 			CWmfBrush* pBrush = new CWmfBrush(oLogBrush);
@@ -1264,6 +1307,7 @@ namespace MetaFile
 		}
 		void Read_META_CREATEFONTINDIRECT()
 		{
+                    LOG_TRACE
 			CWmfFont* pFont = new CWmfFont();
 			if (!pFont)
 				return SetError();
@@ -1273,6 +1317,7 @@ namespace MetaFile
 		}
 		void Read_META_CREATEPALETTE()
 		{
+                    LOG_TRACE
 			CWmfPalette* pPalette = new CWmfPalette();
 			if (!pPalette)
 				return SetError();
@@ -1282,6 +1327,7 @@ namespace MetaFile
 		}
 		void Read_META_CREATEPATTERNBRUSH()
 		{
+                    LOG_TRACE
 			CWmfBrush* pBrush = new CWmfBrush();
 			if (!pBrush)
 				return SetError();
@@ -1298,6 +1344,7 @@ namespace MetaFile
 		}
 		void Read_META_CREATEPENINDIRECT()
 		{
+                    LOG_TRACE
 			CWmfPen* pPen = new CWmfPen();
 			if (!pPen)
 				return SetError();
@@ -1307,6 +1354,7 @@ namespace MetaFile
 		}
 		void Read_META_CREATEREGION()
 		{
+                    LOG_TRACE
 			CWmfRegion* pRegion = new CWmfRegion();
 			if (!pRegion)
 				return SetError();
@@ -1315,6 +1363,7 @@ namespace MetaFile
 		}
 		void Read_META_DELETEOBJECT()
 		{
+                    LOG_TRACE
 			unsigned short ushIndex;
 			m_oStream >> ushIndex;
 			m_oPlayer.DeleteObject(ushIndex);
@@ -1323,6 +1372,7 @@ namespace MetaFile
 		}
 		void Read_META_DIBCREATEPATTERNBRUSH()
 		{
+                    LOG_TRACE
 			unsigned short ushStyle, ushColorUsage;
 			m_oStream >> ushStyle >> ushColorUsage;
 
@@ -1344,6 +1394,7 @@ namespace MetaFile
 		}
 		void Read_META_SELECTCLIPREGION()
 		{
+                    LOG_TRACE
 			unsigned short ushIndex;
 			m_oStream >> ushIndex;
 
@@ -1355,6 +1406,7 @@ namespace MetaFile
 		}
 		void Read_META_SELECTOBJECT()
 		{
+                    LOG_TRACE
 			unsigned short ushIndex;
 			m_oStream >> ushIndex;
 			m_oPlayer.SelectObject(ushIndex);
@@ -1363,6 +1415,7 @@ namespace MetaFile
 		}
 		void Read_META_SELECTPALETTE()
 		{
+                    LOG_TRACE
 			unsigned short ushIndex;
 			m_oStream >> ushIndex;
 			m_oPlayer.SelectPalette(ushIndex);
@@ -1370,6 +1423,7 @@ namespace MetaFile
 		}
 		void Read_META_EXCLUDECLIPRECT()
 		{
+                    LOG_TRACE
 			short shLeft, shTop, shRight, shBottom;
 			m_oStream >> shBottom >> shRight >> shTop >> shLeft;
 
@@ -1412,6 +1466,7 @@ namespace MetaFile
 		}
 		void Read_META_INTERSECTCLIPRECT()
 		{
+                    LOG_TRACE
 			short shLeft, shTop, shRight, shBottom;
 			m_oStream >> shBottom >> shRight >> shTop >> shLeft;
 
@@ -1424,12 +1479,14 @@ namespace MetaFile
 		}
 		void Read_META_MOVETO()
 		{
+                    LOG_TRACE
 			short shX, shY;
 			m_oStream >> shY >> shX;
 			MoveTo(shX, shY);
 		}
 		void Read_META_OFFSETCLIPRGN()
 		{
+                    LOG_TRACE
 			short shOffsetX, shOffsetY;
 			m_oStream >> shOffsetY >> shOffsetX;
 			// TODO: Реализовать
@@ -1437,6 +1494,7 @@ namespace MetaFile
 		}
 		void Read_META_OFFSETVIEWPORTORG()
 		{
+                    LOG_TRACE
 			short shXOffset, shYOffset;
 			m_oStream >> shYOffset >> shXOffset;
 			m_pDC->SetViewportOff(shXOffset, shYOffset);
@@ -1444,6 +1502,7 @@ namespace MetaFile
 		}
 		void Read_META_OFFSETWINDOWORG()
 		{
+                    LOG_TRACE
 			short shXOffset, shYOffset;
 			m_oStream >> shYOffset >> shXOffset;
 			m_pDC->SetWindowOff(shXOffset, shYOffset);
@@ -1451,16 +1510,19 @@ namespace MetaFile
 		}
 		void Read_META_RESTOREDC()
 		{
+                    LOG_TRACE
 			m_pDC = m_oPlayer.RestoreDC();
 			UpdateOutputDC();
 		}
 		void Read_META_SAVEDC()
 		{
+                    LOG_TRACE
 			m_pDC = m_oPlayer.SaveDC();
 			UpdateOutputDC();
 		}
 		void Read_META_SCALEVIEWPORTEXT()
 		{
+                    LOG_TRACE
 			short yDenom, yNum, xDenom, xNum;
 			m_oStream >> yDenom >> yNum >> xDenom >> xNum;
 			m_pDC->SetViewportScale((double)xNum / (double)xDenom, (double)yNum / (double)xDenom);
@@ -1468,6 +1530,7 @@ namespace MetaFile
 		}
 		void Read_META_SCALEWINDOWEXT()
 		{
+                    LOG_TRACE
 			short yDenom, yNum, xDenom, xNum;
 			m_oStream >> yDenom >> yNum >> xDenom >> xNum;
 			m_pDC->SetWindowScale((double)xNum / (double)xDenom, (double)yNum / (double)xDenom);
@@ -1475,6 +1538,7 @@ namespace MetaFile
 		}
 		void Read_META_SETBKCOLOR()
 		{
+                    LOG_TRACE
 			TWmfColor oColor;
 			m_oStream >> oColor;
 			m_pDC->SetTextBgColor(oColor);
@@ -1482,6 +1546,7 @@ namespace MetaFile
 		}
 		void Read_META_SETBKMODE()
 		{
+                    LOG_TRACE
 			unsigned short ushMode;
 			m_oStream >> ushMode;
 			m_pDC->SetTextBgMode(ushMode);
@@ -1489,6 +1554,7 @@ namespace MetaFile
 		}
 		void Read_META_SETLAYOUT()
 		{
+                    LOG_TRACE
 			unsigned short ushLayout, ushReserved;
 			m_oStream >> ushLayout >> ushReserved;
 			m_pDC->SetLayout(ushLayout);
@@ -1496,6 +1562,7 @@ namespace MetaFile
 		}
 		void Read_META_SETMAPMODE()
 		{
+                    LOG_TRACE
 			unsigned short ushMapMode; 
 			m_oStream >> ushMapMode;
 			m_pDC->SetMapMode(ushMapMode);
@@ -1503,6 +1570,7 @@ namespace MetaFile
 		}
 		void Read_META_SETPOLYFILLMODE()
 		{
+                    LOG_TRACE
 			unsigned short ushMode;
 			m_oStream >> ushMode;
 			m_pDC->SetPolyFillMode(ushMode);
@@ -1510,6 +1578,7 @@ namespace MetaFile
 		}
 		void Read_META_SETROP2()
 		{
+                    LOG_TRACE
 			unsigned short ushMode;
 			m_oStream >> ushMode;
 			m_pDC->SetRop2Mode(ushMode);
@@ -1517,6 +1586,7 @@ namespace MetaFile
 		}
 		void Read_META_SETSTRETCHBLTMODE()
 		{
+                    LOG_TRACE
 			unsigned short ushMode;
 			m_oStream >> ushMode;
 			m_pDC->SetStretchBltMode(ushMode);
@@ -1524,6 +1594,7 @@ namespace MetaFile
 		}
 		void Read_META_SETTEXTALIGN()
 		{
+                    LOG_TRACE
 			unsigned short ushTextAlign;
 			m_oStream >> ushTextAlign;
 			m_pDC->SetTextAlign(ushTextAlign);
@@ -1531,6 +1602,7 @@ namespace MetaFile
 		}
 		void Read_META_SETTEXTCHAREXTRA()
 		{
+                    LOG_TRACE
 			unsigned short ushCharSpacing;
 			m_oStream >> ushCharSpacing;
 			m_pDC->SetCharSpacing(ushCharSpacing);
@@ -1538,6 +1610,7 @@ namespace MetaFile
 		}
 		void Read_META_SETTEXTCOLOR()
 		{
+                    LOG_TRACE
 			TWmfColor oColor;
 			m_oStream >> oColor;
 			m_pDC->SetTextColor(oColor);
@@ -1545,6 +1618,7 @@ namespace MetaFile
 		}
 		void Read_META_SETTEXTJUSTIFICATION()
 		{
+                    LOG_TRACE
 			unsigned short ushBreakCount, ushBreakExtra;
 			m_oStream >> ushBreakCount >> ushBreakExtra;
 			// TODO: Реализовать
@@ -1552,6 +1626,7 @@ namespace MetaFile
 		}
 		void Read_META_SETVIEWPORTEXT()
 		{
+                    LOG_TRACE
 			short shX, shY;
 			m_oStream >> shY >> shX;
 			m_pDC->SetViewportExt(shX, shY);
@@ -1559,6 +1634,7 @@ namespace MetaFile
 		}
 		void Read_META_SETVIEWPORTORG()
 		{
+                    LOG_TRACE
 			short shX, shY;
 			m_oStream >> shY >> shX;
 			m_pDC->SetViewportOrg(shX, shY);
@@ -1566,6 +1642,7 @@ namespace MetaFile
 		}
 		void Read_META_SETWINDOWEXT()
 		{
+                    LOG_TRACE
 			short shX, shY;
 			m_oStream >> shY >> shX;
 			m_pDC->SetWindowExt(shX, shY);
@@ -1573,20 +1650,506 @@ namespace MetaFile
 		}
 		void Read_META_SETWINDOWORG()
 		{
+                    LOG_TRACE
 			short shX, shY;
 			m_oStream >> shY >> shX;
 			m_pDC->SetWindowOrg(shX, shY);
 			UpdateOutputDC();
 		}
-		void Read_META_ESCAPE()
+                void  Read_META_ESCAPE()
 		{
+                    LOG_TRACE
 			unsigned short ushEscapeFunction;
-			unsigned short ushByteCount;
-			m_oStream >> ushEscapeFunction;
-			m_oStream >> ushByteCount;
+                        m_oStream >> ushEscapeFunction;
 
+                        switch (ushEscapeFunction)
+                        {
+                            case NEWFRAME: READ_NEWFRAME(); break;
+                            case ABORTDOC: READ_ABORTDOC(); break;
+                            case NEXTBAND: READ_NEXTBAND(); break;
+                            case SETCOLORTABLE: READ_SET_COLORTABLE(); break;
+                            case GETCOLORTABLE: READ_GET_COLORTABLE(); break;
+                            case FLUSHOUTPUT: READ_UNSUPPORTED(); break;
+                            case DRAFTMODE: READ_UNSUPPORTED(); break;
+                            case QUERYESCSUPPORT: READ_QUERY_ESCSUPPORT(); break;
+                            case SETABORTPROC: READ_UNSUPPORTED(); break;
+                            case STARTDOC: READ_STARTDOC(); break;
+                            case ENDDOC: READ_ENDDOC(); break;
+                            case GETPHYSPAGESIZE: READ_GET_PHYSPAGESIZE(); break;
+                            case GETPRINTINGOFFSET: READ_GET_PRINTINGOFFSET(); break;
+                            case GETSCALINGFACTOR: READ_GET_SCALINGFACTOR();  break;
+                            case MFCOMMENT: READ_META_ESCAPE_ENHANCED_METAFILE();  break;
+                            case GETPENWIDTH /* SETPENWIDTH */: READ_UNSUPPORTED(); break;
+                            case SETCOPYCOUNT: READ_SET_COPYCOUNT(); break;
+                            case SELECTPAPERSOURCE: READ_UNSUPPORTED(); break;
+                            case PASSTHROUGH: READ_PASSTHROUGH(); break;
+                            case GETTECHNOLOGY: READ_UNSUPPORTED(); break;
+                            case SETLINECAP: READ_SET_LINECAP(); break;
+                            case SETLINEJOIN: READ_SET_LINEJOIN(); break;
+                            case SETMITERLIMIT: READ_SET_MITERLIMIT(); break;
+                            case BANDINFO: READ_UNSUPPORTED(); break;
+                            case DRAWPATTERNRECT: READ_DRAW_PATTERNRECT(); break;
+                            case GETVECTORPENSIZE: READ_UNSUPPORTED(); break;
+                            case GETVECTORBRUSHSIZE: READ_UNSUPPORTED(); break;
+                            case ENABLEDUPLEX: READ_UNSUPPORTED(); break;
+                            case GETSETPAPERBINS: READ_UNSUPPORTED(); break;
+                            case GETSETPRINTORIENT: READ_UNSUPPORTED(); break;
+                            case ENUMPAPERBINS: READ_UNSUPPORTED(); break;
+                            case SETDIBSCALING: READ_UNSUPPORTED(); break;
+                            case EPSPRINTING: READ_EPS_PRINTING(); break;
+                            case ENUMPAPERMETRICS: READ_UNSUPPORTED(); break;
+                            case GETSETPAPERMETRICS: READ_UNSUPPORTED(); break;
+                            case POSTSCRIPT_DATA: READ_POSTSCRIPT_DATA(); break;
+                            case POSTSCRIPT_IGNORE: READ_POSTSCRIPT_IGNORE(); break;
+                            case GETDEVICEUNITS: READ_GET_DEVICEUNITS(); break;
+                            case GETEXTENDEDTEXTMETRICS: READ_GET_EXTENDED_TEXTMETRICS(); break;
+                            case GETPAIRKERNTABLE: READ_GET_PAIRKERNTABLE(); break;
+                            case EXTTEXTOUT: READ_EXTTEXTOUT(); break;
+                            case GETFACENAME: READ_GET_FACENAME(); break;
+                            case DOWNLOADFACE: READ_DOWNLOAD_FACE(); break;
+                            case METAFILE_DRIVER: READ_METAFILE_DRIVER(); break;
+                            case QUERYDIBSUPPORT: READ_QUERY_DIBSUPPORT(); break;
+                            case BEGIN_PATH: READ_BEGIN_PATH(); break;
+                            case CLIP_TO_PATH: READ_CLIP_TO_PATH(); break;
+                            case END_PATH: READ_END_PATH(); break;
+                            case OPENCHANNEL: READ_OPEN_CHANNEL(); break;
+                            case DOWNLOADHEADER: READ_DOWNLOAD_HEADER(); break;
+                            case CLOSECHANNEL: READ_CLOSE_CHANNEL(); break;
+                            case POSTSCRIPT_PASSTHROUGH: READ_POSTSCRIPT_PASSTHROUGH(); break;
+                            case ENCAPSULATED_POSTSCRIPT: READ_ENCAPSULATED_POSTSCRIPT(); break;
+                            case POSTSCRIPT_IDENTIFY: READ_POSTSCRIPT_IDENTIFY(); break;
+                            case POSTSCRIPT_INJECTION: READ_POSTSCRIPT_INJECTION(); break;
+                            case CHECKJPEGFORMAT: READ_CHECK_JPEGFORMAT(); break;
+                            case CHECKPNGFORMAT: READ_CHECK_PNGFORMAT(); break;
+                            case GET_PS_FEATURESETTING: READ_GET_PS_FEATURESETTING(); break;
+                            case GDIPLUS_TS_QUERYVER: READ_UNSUPPORTED(); break;
+                            case SPCLPASSTHROUGH2: READ_SPCLPASSTHROUGH2(); break;
+                            default: READ_UNKNOWN(); break;
+                        }
 			// TODO: Реализовать
 		}
+
+                void READ_ABORTDOC()
+                {
+                    LOG_TRACE
+                }
+
+                void READ_BEGIN_PATH()
+                {
+                    LOG_TRACE
+                }
+
+                void READ_CHECK_JPEGFORMAT()
+                {
+                    LOG_TRACE
+                }
+
+                void READ_CHECK_PNGFORMAT()
+                {
+                    LOG_TRACE
+                }
+
+                void READ_CLIP_TO_PATH()
+                {
+                    LOG_TRACE
+                }
+
+                void READ_CLOSE_CHANNEL()
+                {
+                    LOG_TRACE
+                }
+
+                void READ_DOWNLOAD_FACE()
+                {
+                    LOG_TRACE
+                }
+
+                void READ_DOWNLOAD_HEADER()
+                {
+                    LOG_TRACE
+                }
+
+                void READ_DRAW_PATTERNRECT()
+                {
+                    LOG_TRACE
+                }
+
+                void READ_ENCAPSULATED_POSTSCRIPT()
+                {
+                    LOG_TRACE
+                }
+
+                void READ_END_PATH()
+                {
+                    LOG_TRACE
+                }
+
+                void READ_ENDDOC()
+                {
+                    LOG_TRACE
+                }
+
+                void READ_EPS_PRINTING()
+                {
+                    LOG_TRACE
+                }
+
+                void READ_EXTTEXTOUT()
+                {
+                    LOG_TRACE
+                }
+
+                void READ_GET_COLORTABLE()
+                {
+                    LOG_TRACE
+                    unsigned short ushByteCount;
+                    unsigned short ushBegin;
+                    m_oStream >> ushByteCount;
+                    m_oStream >> ushBegin;
+                }
+
+                void READ_GET_DEVICEUNITS()
+                {
+                    LOG_TRACE
+
+                }
+
+                void READ_GET_EXTENDED_TEXTMETRICS()
+                {
+                    LOG_TRACE
+                }
+
+                void READ_GET_FACENAME()
+                {
+                    LOG_TRACE
+                }
+
+                void READ_GET_PAIRKERNTABLE()
+                {
+                    LOG_TRACE
+                }
+
+                void READ_GET_PHYSPAGESIZE()
+                {
+                    LOG_TRACE
+                }
+
+                void READ_GET_PRINTINGOFFSET()
+                {
+                    LOG_TRACE
+                }
+
+                void READ_GET_PS_FEATURESETTING()
+                {
+                    LOG_TRACE
+                }
+
+                void READ_GET_SCALINGFACTOR()
+                {
+                    LOG_TRACE
+                }
+
+                void READ_META_ESCAPE_ENHANCED_METAFILE()
+                {
+                    LOG_TRACE
+                    unsigned short ushByteCount;
+                    unsigned int uiCommentIdentifier;
+                    unsigned int uiCommentType;
+                    unsigned int uiVersion;
+                    unsigned short ushChecksum;
+                    unsigned int uiBunting;
+                    unsigned int uiCommentRecordCount;
+                    unsigned int uiCurrentRecordSize;
+                    unsigned int uiRemainingBytes;
+                    unsigned int uiEnhancedMetafileDataSize;
+
+                    m_oStream >> ushByteCount;
+                    m_oStream >> uiCommentIdentifier;
+                    m_oStream >> uiCommentType;
+                    m_oStream >> uiVersion;
+                    m_oStream >> ushChecksum;
+                    m_oStream >> uiBunting;
+                    m_oStream >> uiCommentRecordCount;
+                    m_oStream >> uiCurrentRecordSize;
+                    m_oStream >> uiRemainingBytes;
+                    m_oStream >> uiEnhancedMetafileDataSize;
+
+//                    std::wcout << L"----------------------" << std::endl;
+//                    std::wcout << ushByteCount << std::endl;
+//                    std::wcout << uiCommentIdentifier << std::endl;
+//                    std::wcout << uiCommentType << std::endl;
+//                    std::wcout << uiVersion << std::endl;
+//                    std::wcout << uiBunting << std::endl;
+//                    std::wcout << uiCommentRecordCount << std::endl;
+//                    std::wcout << uiCurrentRecordSize << std::endl;
+//                    std::wcout << uiRemainingBytes << std::endl;
+//                    std::wcout << uiEnhancedMetafileDataSize << std::endl;
+//                    std::wcout << L"----------------------" << std::endl;
+
+                    if (uiCommentIdentifier == 0x43464D57 &&
+                        uiCommentType       == 0x00000001 &&
+                        uiVersion           == 0x00010000 &&
+                        uiBunting           == 0x00000000 &&
+                        uiCurrentRecordSize <= 0x00002000)
+                    {
+                        unsigned int ulSize, ulType;
+
+                        m_oStream >> ulType;
+                        m_oStream >> ulSize;
+
+                        switch (ulType)
+                        {
+                                //-----------------------------------------------------------
+                                // 2.3.1 Bitmap
+                                //-----------------------------------------------------------
+                                case EMR_ALPHABLEND:        LOGGING(L"EMR_ALPHABLEND"); break;
+                                case EMR_BITBLT:            LOGGING(L"EMR_BITBLT"); break;
+                                case EMR_STRETCHDIBITS:     LOGGING(L"EMR_STRETCHDIBITS"); break;
+                                case EMR_SETDIBITSTODEVICE: LOGGING(L"EMR_SETDIBITSTODEVICE"); break;
+                                case EMR_STRETCHBLT:        LOGGING(L"EMR_STRETCHBLT"); break;
+                                        //-----------------------------------------------------------
+                                        // 2.3.2 Clipping
+                                        //-----------------------------------------------------------
+                                case EMR_EXCLUDECLIPRECT:   LOGGING(L"EMR_EXCLUDECLIPRECT"); break;
+                                case EMR_EXTSELECTCLIPRGN:  LOGGING(L"EMR_EXTSELECTCLIPRGN"); break;
+                                case EMR_INTERSECTCLIPRECT: LOGGING(L"EMR_INTERSECTCLIPRECT"); break;
+                                case EMR_SELECTCLIPPATH:    LOGGING(L"EMR_SELECTCLIPPATH"); break;
+                                case EMR_SETMETARGN:        LOGGING(L"EMR_SETMETARGN"); break;
+                                        //-----------------------------------------------------------
+                                        // 2.3.4 Control
+                                        //-----------------------------------------------------------
+                                case EMR_HEADER: LOGGING(L"EMR_HEADER"); break;
+                                case EMR_EOF:    LOGGING(L"EMR_EOF"); break;
+                                        //-----------------------------------------------------------
+                                        // 2.3.5 Drawing
+                                        //-----------------------------------------------------------
+                                case EMR_ANGLEARC:          LOGGING(L"EMR_ANGLEARC"); break;
+                                case EMR_ARC:               LOGGING(L"EMR_ARC"); break;
+                                case EMR_ARCTO:             LOGGING(L"EMR_ARCTO"); break;
+                                case EMR_CHORD:             LOGGING(L"EMR_CHORD"); break;
+                                case EMR_ELLIPSE:           LOGGING(L"EMR_ELLIPSE"); break;
+                                case EMR_EXTTEXTOUTA:       LOGGING(L"EMR_EXTTEXTOUTA"); break;
+                                case EMR_EXTTEXTOUTW:       LOGGING(L"EMR_EXTTEXTOUTW"); break;
+                                case EMR_FILLPATH:          LOGGING(L"EMR_FILLPATH"); break;
+                                case EMR_LINETO:            LOGGING(L"EMR_LINETO"); break;
+                                case EMR_PIE:               LOGGING(L"EMR_PIE"); break;
+                                case EMR_POLYBEZIER:        LOGGING(L"EMR_POLYBEZIER"); break;
+                                case EMR_POLYBEZIER16:      LOGGING(L"EMR_POLYBEZIER16"); break;
+                                case EMR_POLYBEZIERTO:      LOGGING(L"EMR_POLYBEZIERTO"); break;
+                                case EMR_POLYBEZIERTO16:    LOGGING(L"EMR_POLYBEZIERTO16"); break;
+                                case EMR_POLYDRAW:          LOGGING(L"EMR_POLYDRAW"); break;
+                                case EMR_POLYDRAW16:        LOGGING(L"EMR_POLYDRAW16"); break;
+                                case EMR_POLYGON:           LOGGING(L"EMR_POLYGON"); break;
+                                case EMR_POLYGON16:         LOGGING(L"EMR_POLYGON16"); break;
+                                case EMR_POLYLINE:          LOGGING(L"EMR_POLYLINE"); break;
+                                case EMR_POLYLINE16:        LOGGING(L"EMR_POLYLINE16"); break;
+                                case EMR_POLYLINETO:        LOGGING(L"EMR_POLYLINETO"); break;
+                                case EMR_POLYLINETO16:      LOGGING(L"EMR_POLYLINETO16"); break;
+                                case EMR_POLYPOLYGON:       LOGGING(L"EMR_POLYPOLYGON"); break;
+                                case EMR_POLYPOLYGON16:     LOGGING(L"EMR_POLYPOLYGON16"); break;
+                                case EMR_POLYPOLYLINE:      LOGGING(L"EMR_POLYPOLYLINE"); break;
+                                case EMR_POLYPOLYLINE16:    LOGGING(L"EMR_POLYPOLYLINE16"); break;
+                                case EMR_POLYTEXTOUTA:      LOGGING(L"EMR_POLYTEXTOUTA"); break;
+                                case EMR_POLYTEXTOUTW:      LOGGING(L"EMR_POLYTEXTOUTW"); break;
+                                case EMR_RECTANGLE:         LOGGING(L"EMR_RECTANGLE"); break;
+                                case EMR_ROUNDRECT:         LOGGING(L"EMR_ROUNDRECT"); break;
+                                case EMR_SETPIXELV:         LOGGING(L"EMR_SETPIXELV"); break;
+                                case EMR_SMALLTEXTOUT:      LOGGING(L"EMR_SMALLTEXTOUT"); break;
+                                case EMR_STROKEANDFILLPATH: LOGGING(L"EMR_STROKEANDFILLPATH"); break;
+                                case EMR_STROKEPATH:        LOGGING(L"EMR_STROKEPATH"); break;
+                                        //-----------------------------------------------------------
+                                        // 2.3.7 Object Creation
+                                        //-----------------------------------------------------------
+                                case EMR_CREATEBRUSHINDIRECT:     LOGGING(L"EMR_CREATEBRUSHINDIRECT"); break;
+                                case EMR_CREATEDIBPATTERNBRUSHPT: LOGGING(L"EMR_CREATEDIBPATTERNBRUSHPT"); break;
+                                case EMR_CREATEPALETTE:           LOGGING(L"EMR_CREATEPALETTE"); break;
+                                case EMR_CREATEPEN:               LOGGING(L"EMR_CREATEPEN"); break;
+                                case EMR_EXTCREATEFONTINDIRECTW:  LOGGING(L"EMR_EXTCREATEFONTINDIRECTW"); break;
+                                case EMR_EXTCREATEPEN:            LOGGING(L"EMR_EXTCREATEPEN"); break;
+                                        //-----------------------------------------------------------
+                                        // 2.3.8 Object Manipulation
+                                        //-----------------------------------------------------------
+                                case EMR_SELECTOBJECT:  LOGGING(L"EMR_SELECTOBJECT"); break;
+                                case EMR_DELETEOBJECT:  LOGGING(L"EMR_DELETEOBJECT"); break;
+                                case EMR_SELECTPALETTE: LOGGING(L"EMR_SELECTPALETTE"); break;
+                                        //-----------------------------------------------------------
+                                        // 2.3.10 Path Bracket
+                                        //-----------------------------------------------------------
+                                case EMR_BEGINPATH:   LOGGING(L"EMR_BEGINPATH"); break;
+                                case EMR_ENDPATH:     LOGGING(L"EMR_ENDPATH"); break;
+                                case EMR_CLOSEFIGURE: LOGGING(L"EMR_CLOSEFIGURE"); break;
+                                case EMR_FLATTENPATH: LOGGING(L"EMR_FLATTENPATH"); break;
+                                case EMR_WIDENPATH:   LOGGING(L"EMR_WIDENPATH"); break;
+                                case EMR_ABORTPATH:   LOGGING(L"EMR_ABORTPATH"); break;
+                                        //-----------------------------------------------------------
+                                        // 2.3.11 State
+                                        //-----------------------------------------------------------
+                                case EMR_MOVETOEX:          LOGGING(L"EMR_MOVETOEX"); break;
+                                case EMR_SETARCDIRECTION:   LOGGING(L"EMR_SETARCDIRECTION"); break;
+                                case EMR_SAVEDC:            LOGGING(L"EMR_SAVEDC"); break;
+                                case EMR_RESTOREDC:         LOGGING(L"EMR_RESTOREDC"); break;
+                                case EMR_SETTEXTCOLOR:      LOGGING(L"EMR_SETTEXTCOLOR"); break;
+                                case EMR_SETTEXTALIGN:      LOGGING(L"EMR_SETTEXTALIGN"); break;
+                                case EMR_SETBKMODE:         LOGGING(L"EMR_SETBKMODE"); break;
+                                case EMR_SETMITERLIMIT:     LOGGING(L"EMR_SETMITERLIMIT"); break;
+                                case EMR_SETPOLYFILLMODE:   LOGGING(L"EMR_SETPOLYFILLMODE"); break;
+                                case EMR_SETMAPMODE:        LOGGING(L"EMR_SETMAPMODE"); break;
+                                case EMR_SETWINDOWORGEX:    LOGGING(L"EMR_SETWINDOWORGEX"); break;
+                                case EMR_SETWINDOWEXTEX:    LOGGING(L"EMR_SETWINDOWEXTEX"); break;
+                                case EMR_SETVIEWPORTORGEX:  LOGGING(L"EMR_SETVIEWPORTORGEX"); break;
+                                case EMR_SETVIEWPORTEXTEX:  LOGGING(L"EMR_SETVIEWPORTEXTEX"); break;
+                                case EMR_SETBKCOLOR:        LOGGING(L"EMR_SETBKCOLOR"); break;
+                                case EMR_SETSTRETCHBLTMODE: LOGGING(L"EMR_SETSTRETCHBLTMODE"); break;
+                                case EMR_SETICMMODE:        LOGGING(L"EMR_SETICMMODE"); break;
+                                case EMR_SETROP2:           LOGGING(L"EMR_SETROP2"); break;
+                                case EMR_REALIZEPALETTE:    LOGGING(L"EMR_REALIZEPALETTE"); break;
+                                case EMR_SETLAYOUT:         LOGGING(L"EMR_SETLAYOUT"); break;
+                                case EMR_SETBRUSHORGEX:     LOGGING(L"EMR_SETBRUSHORGEX"); break;
+                                        //-----------------------------------------------------------
+                                        // 2.3.12 Transform
+                                        //-----------------------------------------------------------
+                                case EMR_SETWORLDTRANSFORM: LOGGING(L"EMR_MODIFYWORLDTRANSFORM"); break;
+                                case EMR_MODIFYWORLDTRANSFORM: LOGGING(L"EMR_MODIFYWORLDTRANSFORM"); break;
+                                        //-----------------------------------------------------------
+                                        // Неподдерживаемые записи
+                                        //-----------------------------------------------------------
+                                case EMR_GDICOMMENT: LOGGING(L"EMR_GDICOMMENT"); break;
+                                        //-----------------------------------------------------------
+                                        // Неизвестные записи
+                                        //-----------------------------------------------------------
+                                default:
+                                {
+                                        LOGGING(L"UNKNOWN");
+                                        break;
+                                }
+                        }
+                    }
+
+                }
+
+                void READ_METAFILE_DRIVER()
+                {
+                    LOG_TRACE
+                }
+
+                void READ_NEWFRAME()
+                {
+                    LOG_TRACE
+                }
+
+                void READ_NEXTBAND()
+                {
+                    LOG_TRACE
+                }
+
+                void READ_PASSTHROUGH()
+                {
+                    LOG_TRACE
+                }
+
+                void READ_POSTSCRIPT_DATA()
+                {
+                    LOG_TRACE
+                }
+
+                void READ_POSTSCRIPT_IDENTIFY()
+                {
+                    LOG_TRACE
+                }
+
+                void READ_POSTSCRIPT_IGNORE()
+                {
+                    LOG_TRACE
+                }
+
+                void READ_POSTSCRIPT_INJECTION()
+                {
+                    LOG_TRACE
+                }
+
+                void READ_POSTSCRIPT_PASSTHROUGH()
+                {
+                    LOG_TRACE
+                }
+
+                void READ_OPEN_CHANNEL()
+                {
+                    LOG_TRACE
+                }
+
+                void READ_QUERY_DIBSUPPORT()
+                {
+                    LOG_TRACE
+                }
+
+                void READ_QUERY_ESCSUPPORT()
+                {
+                    LOG_TRACE
+                    unsigned short ushByteCount;
+                    unsigned short ushRequest;
+                    m_oStream >> ushByteCount;
+                    m_oStream >> ushRequest;
+
+                    std::wcout << ushRequest << std::endl;
+                }
+
+                void READ_SET_COLORTABLE()
+                {
+                    LOG_TRACE
+                    unsigned short ushByteCount;
+
+                    m_oStream >> ushByteCount;
+                    m_oStream.Skip(ushByteCount);
+                }
+
+                void READ_SET_COPYCOUNT()
+                {
+                    LOG_TRACE
+                }
+
+                void READ_SET_LINECAP()
+                {
+                    LOG_TRACE
+                }
+
+                void READ_SET_LINEJOIN()
+                {
+                    LOG_TRACE
+                }
+
+                void READ_SET_MITERLIMIT()
+                {
+                    LOG_TRACE
+                    unsigned short ushByteCount;
+                    int nMiterLimit;
+                    m_oStream >> ushByteCount;
+                    m_oStream >> nMiterLimit;
+
+                    if (ushByteCount == 0x0004)
+                    {
+                        // TODO:
+                    }
+                }
+
+                void READ_SPCLPASSTHROUGH2()
+                {
+                    LOG_TRACE
+                }
+
+                void READ_STARTDOC()
+                {
+                    LOG_TRACE
+                }
+
+                void READ_UNSUPPORTED()
+                {
+                    LOG_TRACE
+                }
+
+                void READ_UNKNOWN()
+                {
+                    LOG_TRACE
+                }
 
 	private:
 
