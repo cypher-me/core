@@ -110,12 +110,12 @@ namespace MetaFile
 		}
                 void          Scan()
 		{
-			IOutputDevice* pOutput = m_pOutput;
-			m_pOutput = NULL;
+                        IOutputDevice* pOutput = m_pOutput;
+                        m_pOutput = NULL;
                         PlayMetaFile();
-			m_pOutput = pOutput;
+                        m_pOutput = pOutput;
 
-			this->ClearFile();
+                        this->ClearFile();
 		}
 		CFontManager* GetFontManager()
 		{

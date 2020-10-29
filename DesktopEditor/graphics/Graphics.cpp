@@ -33,6 +33,8 @@
 #include <algorithm>
 #include "../fontengine/FontFile.h"
 
+#include <iostream>
+
 namespace Aggplus
 {
 	CGraphics::CGraphics()
@@ -1034,8 +1036,13 @@ namespace Aggplus
 		CMatrix oM1 = oMatrix;
 		oM1.Invert();
 		oM1.Multiply(&m_oFullTransform, MatrixOrderPrepend);
-		oM1.TransformPoint(_x, _y);
+//		oM1.TransformPoint(_x, _y);
 		
+        if (_x < 0)
+            _x = -_x;
+        if (_y < 0)
+            _y = -_y;
+
 		pFont->SetTextMatrix((float)mass[0], (float)mass[1], (float)mass[2], (float)mass[3], (float)mass[4], (float)mass[5]);
         m_nTextRenderMode = pFont->m_nRENDER_MODE;
 

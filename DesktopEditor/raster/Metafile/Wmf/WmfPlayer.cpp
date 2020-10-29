@@ -170,7 +170,6 @@ namespace MetaFile
 		{
 			CWmfObjectBase* pObject = oPos->second;
 
-
 			switch (pObject->GetType())
 			{
 			case WMF_OBJECT_BRUSH: m_pDC->SetBrush((CWmfBrush*)pObject); break;
@@ -178,6 +177,8 @@ namespace MetaFile
 			case WMF_OBJECT_PEN: m_pDC->SetPen((CWmfPen*)pObject); break;
 			case WMF_OBJECT_PALETTE: m_pDC->SetPalette((CWmfPalette*)pObject); break;
 			case WMF_OBJECT_REGION: m_pDC->SetRegion((CWmfRegion*)pObject); break;
+            default:
+                break;
 			}
 		}
 	}
@@ -235,7 +236,7 @@ namespace MetaFile
 		m_pBrush       = &m_oDefaultBrush;
 		m_pPen         = &m_oDefaultPen;
 		m_pPalette     = NULL;
-		m_pFont        = NULL;
+//		m_pFont        = NULL;
 		m_pRegion      = NULL;
 		m_ushMapMode   = MM_TEXT;
 		m_dPixelWidth  = 1;
@@ -333,16 +334,16 @@ namespace MetaFile
 	}
 	void           CWmfDC::SetFont(CWmfFont* pFont)
 	{
-		m_pFont = pFont;
+        m_pFont = *pFont;
 	}
 	void           CWmfDC::RemoveFont(CWmfFont* pFont)
 	{
-		if (m_pFont == pFont)
-			m_pFont = NULL;
+//		if (m_pFont == pFont)
+//			m_pFont = NULL;
 	}
 	CWmfFont*      CWmfDC::GetFont()
 	{
-		return m_pFont;
+        return &m_pFont;
 	}
 	void           CWmfDC::SetRegion(CWmfRegion* pRegion)
 	{

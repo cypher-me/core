@@ -217,7 +217,7 @@ static const struct ActionNamesEmf
 				continue;
 
 			m_ulRecordPos	= m_oStream.Tell();
-			m_ulRecordSize	= ulSize - 8;
+            m_ulRecordSize	= ulSize - 8;
 
 			if (ulType < EMR_MIN || ulType > EMR_MAX)
             {
@@ -296,7 +296,7 @@ static const struct ActionNamesEmf
 				case EMR_CREATEBRUSHINDIRECT:     Read_EMR_CREATEBRUSHINDIRECT(); break;
 				case EMR_CREATEDIBPATTERNBRUSHPT: Read_EMR_CREATEDIBPATTERNBRUSHPT(); break;
 				case EMR_CREATEPALETTE:           Read_EMR_CREATEPALETTE(); break;
-				case EMR_CREATEPEN:				Read_EMR_CREATEPEN(); break;
+                case EMR_CREATEPEN:               Read_EMR_CREATEPEN(); break;
 				case EMR_EXTCREATEFONTINDIRECTW:  Read_EMR_EXTCREATEFONTINDIRECTW(); break;
 				case EMR_EXTCREATEPEN:            Read_EMR_EXTCREATEPEN(); break;
 					//-----------------------------------------------------------
@@ -364,13 +364,13 @@ static const struct ActionNamesEmf
 			m_oStream.Skip(need_skip);
 			
 #ifdef _DEBUG
-			if ( need_skip != 0 && !m_pOutput)
-			{
-				std::wstring name = actionNamesEmf[ulType].actionName;
+            if ( need_skip != 0 && !m_pOutput)
+            {
+                std::wstring name = actionNamesEmf[ulType].actionName;
 
-				std::wcout << name << L"\t\t(" << ulType << L")\t; skiped = " << need_skip << L"\n";
-			}			
-#endif   
+                std::wcout << name << L"\t\t(" << ulType << L")\t; skiped = " << need_skip << L"\n";
+            }
+#endif
 			ulRecordIndex++;
 
 		} while (!CheckError());
@@ -530,6 +530,7 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::DrawText(std::wstring& wsString, unsigned int unCharsCount, int _nX, int _nY, int* pnDx, int iGraphicsMode)
 	{
+        LOGGING(wsString)
 		int nX = _nX;
 		int nY = _nY;
 
@@ -708,14 +709,14 @@ static const struct ActionNamesEmf
 		}
 		else
 		{
-			unLen = 0;
-			unsigned int* pUnicodes = NSStringExt::CConverter::GetUtf32FromUnicode(wsText, unLen);
-			if (pUnicodes)
-				delete[] pUnicodes;
-		}
+            unLen = 0;
+            unsigned int* pUnicodes = NSStringExt::CConverter::GetUtf32FromUnicode(wsText, unLen);
+            if (pUnicodes)
+                delete[] pUnicodes;
+        }
 
-		if (unLen)
-			DrawText(wsText, unLen, oText.Reference.x, oText.Reference.y, pDx, iGraphicsMode);
+        if (unLen > 0)
+            DrawText(wsText, unLen, oText.Reference.x, oText.Reference.y, pDx, iGraphicsMode);
 
 		if (pDx)
 			delete[] pDx;
@@ -1571,9 +1572,9 @@ static const struct ActionNamesEmf
 	void CEmfFile::Read_EMR_EXTTEXTOUTW()
 	{
         LOG_TRACE
-		TEmfExtTextoutW oText;
-		m_oStream >> oText;
-		DrawTextW(oText.wEmrText, oText.iGraphicsMode);
+        TEmfExtTextoutW oText;
+        m_oStream >> oText;
+        DrawTextW(oText.wEmrText, oText.iGraphicsMode);
 	}
 	void CEmfFile::Read_EMR_LINETO()
 	{

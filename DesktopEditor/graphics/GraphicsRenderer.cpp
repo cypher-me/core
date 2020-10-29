@@ -651,8 +651,11 @@ HRESULT CGraphicsRenderer::CommandDrawTextCHAR(const LONG& c, const double& x, c
 }
 HRESULT CGraphicsRenderer::CommandDrawText(const std::wstring& bsText, const double& x, const double& y, const double& w, const double& h)
 {
+    LOG_TRACE
+
 	if (c_nHyperlinkType == m_lCurrentCommandType)
 		return S_OK;
+
 	put_BrushType(c_BrushTypeSolid);
 		
 	_SetFont();

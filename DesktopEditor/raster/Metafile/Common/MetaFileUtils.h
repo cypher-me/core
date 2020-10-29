@@ -41,6 +41,8 @@
 
 #include <algorithm>
 
+#include <iostream>
+
 namespace MetaFile
 {
 	struct TRgbQuad
@@ -307,8 +309,8 @@ namespace MetaFile
 			*this >> oText.iGraphicsMode;
 			*this >> oText.exScale;
 			*this >> oText.eyScale;
-			ReadEmrTextW(oText.wEmrText, 36); // 8 + 28 (8 - тип и размер, 28 - размер данной структуры)
 
+                        ReadEmrTextW(oText.wEmrText, 36); // 8 + 28 (8 - тип и размер, 28 - размер данной структуры)
 			return *this;
 		}
 		CDataStream& operator>>(TEmfExtTextoutA& oText)
@@ -673,10 +675,10 @@ namespace MetaFile
 		}
 		CDataStream& operator>>(TWmfColor& oColor)
 		{
+                        *this >> oColor.a;
+                        *this >> oColor.b;
+                        *this >> oColor.g;
 			*this >> oColor.r;
-			*this >> oColor.g;
-			*this >> oColor.b;
-			*this >> oColor.a;
 
 			return *this;
 		}

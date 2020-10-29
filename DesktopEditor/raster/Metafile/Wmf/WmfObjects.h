@@ -109,8 +109,27 @@ namespace MetaFile
 
 		CWmfFont()
 		{
-            memset(Facename, 0x00, 32);
-		}
+                    memset(Facename, 0x00, 32);
+                    Facename[0] = 'A';
+                    Facename[1] = 'r';
+                    Facename[2] = 'i';
+                    Facename[3] = 'a';
+                    Facename[4] = 'l';
+
+                    Height = 5;
+                    Width = 10;
+                    Escapement = 0;
+                    Orientation = 0;
+                    Weight = 400;
+                    Italic = 0x00;
+                    Underline = 0x00;
+                    StrikeOut = 0x00;
+                    CharSet = 0x00;
+                    OutPrecision = 0x00;
+                    ClipPrecision = 0x00;
+                    Quality = 0x00;
+                    PitchAndFamily = 0x00;
+                }
 		~CWmfFont()
 		{
 

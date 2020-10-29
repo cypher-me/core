@@ -147,7 +147,7 @@ namespace MetaFile
 		CWmfBrush*     m_pBrush;
 		CWmfPen*       m_pPen;
 		CWmfPalette*   m_pPalette;
-		CWmfFont*      m_pFont;
+                CWmfFont       m_pFont;
 		CWmfRegion*    m_pRegion;
 		unsigned short m_ushMapMode;
 		double         m_dPixelWidth;

@@ -55,8 +55,8 @@ namespace MetaFile
 		void GetBounds(double* pdX, double* pdY, double* pdW, double* pdH);
 		int GetType();
 		void ConvertToRaster(const wchar_t* wsOutFilePath, unsigned int unFileType, int nWidth, int nHeight = -1);
-                void ConvertToRaster(const wchar_t* wsOutFilePath, unsigned int unFileType);
-		NSFonts::IFontManager* get_FontManager();
+                void ConvertToRaster();
+		NSFonts::IFontManager* get_FontManager();                
 
 	private:
 

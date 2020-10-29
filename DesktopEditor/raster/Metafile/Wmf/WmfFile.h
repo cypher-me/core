@@ -65,7 +65,7 @@ namespace MetaFile
 	class CWmfFile : public IMetaFileBase
 	{
 	public:
-		CWmfFile() : m_oPlayer(this)
+                CWmfFile() : m_oPlayer(this), m_oEmfFile(NULL)
 		{
 		}
 		~CWmfFile()
@@ -73,8 +73,18 @@ namespace MetaFile
 			ClearFile();
 		}
 
+                bool ExistsEmf()
+                {
+                    return (NULL == m_oEmfFile) ? false : true;
+                }
+                CEmfFile* GetEmfFile()
+                {
+                    return m_oEmfFile;
+                }
+
         TRectD       GetBounds()
 		{
+//            TRect  oBoundsBox = (NULL == m_oEmfFile) ?  GetBoundingBox() : *(m_oEmfFile->GetDCBounds());
             TRect  oBoundsBox = GetBoundingBox();
             TRectD oBounds = oBoundsBox;
 			if (IsPlaceable())
@@ -88,7 +98,7 @@ namespace MetaFile
 			}
 			return oBounds;
 		}
-		void         PlayMetaFile()
+                void         PlayMetaFile()
 		{
 			if (!m_oStream.IsValid())
 				SetError();
@@ -265,7 +275,10 @@ namespace MetaFile
 			return METAFILE_RGBA(oColor.r, oColor.g, oColor.b);
 		}
 		IFont*       GetFont()
-		{
+                {
+                    if (NULL == m_pDC)
+                        return NULL;
+
 			CWmfFont* pFont = m_pDC->GetFont();
 			if (!pFont)
 				return NULL;
@@ -418,9 +431,9 @@ namespace MetaFile
 				m_pOutput->MoveTo(dX, dY);
 			}
 			else
-			{
-				RegisterPoint(shX, shY);
-			}
+                        {
+                                RegisterPoint(shX, shY);
+                        }
 			m_pDC->SetCurPos(shX, shY);
 		}
 		void LineTo(short shX, short shY)
@@ -428,12 +441,12 @@ namespace MetaFile
 			if (m_pOutput)
 			{
 				double dX, dY;
-				TranslatePoint(shX, shY, dX, dY);
+                                TranslatePoint(shX, shY, dX, dY);
 				m_pOutput->LineTo(dX, dY);
 			}
 			else
-			{
-				RegisterPoint(shX, shY);
+                        {
+                                RegisterPoint(shX, shY);
 			}
 			m_pDC->SetCurPos(shX, shY);
 		}
@@ -717,25 +730,28 @@ namespace MetaFile
 		}
 		void RegisterPoint(short shX, short shY)
 		{
+                    const double dX = 25.4f * shX / 96;
+                    const double dY = 25.4f * shY / 96;
+
 			if (m_bFirstPoint)
 			{
-				m_oBoundingBox.nLeft   = shX;
-				m_oBoundingBox.nRight  = shX;
-				m_oBoundingBox.nTop    = shY;
-				m_oBoundingBox.nBottom = shY;
+                                m_oBoundingBox.nLeft   = dX;
+                                m_oBoundingBox.nRight  = dX;
+                                m_oBoundingBox.nTop    = dY;
+                                m_oBoundingBox.nBottom = dY;
 				m_bFirstPoint = false;
 			}
 			else
 			{
-				if (shX < m_oBoundingBox.nLeft)
-					m_oBoundingBox.nLeft = shX;
-				else if (shX > m_oBoundingBox.nRight)
-					m_oBoundingBox.nRight = shX;
+                                if (dX < m_oBoundingBox.nLeft)
+                                        m_oBoundingBox.nLeft = dX;
+                                else if (dX > m_oBoundingBox.nRight)
+                                        m_oBoundingBox.nRight = dX;
 
-				if (shY < m_oBoundingBox.nTop)
-					m_oBoundingBox.nTop = shY;
-				else if (shY > m_oBoundingBox.nBottom)
-					m_oBoundingBox.nBottom = shY;
+                                if (dY < m_oBoundingBox.nTop)
+                                        m_oBoundingBox.nTop = dY;
+                                else if (dY > m_oBoundingBox.nBottom)
+                                        m_oBoundingBox.nBottom = dY;
 			}
 		}
 		bool ReadImage(unsigned short ushColorUsage, BYTE** ppBgraBuffer, unsigned int* pulWidth, unsigned int* pulHeight)
@@ -1227,14 +1243,18 @@ namespace MetaFile
 			short shL, shT, shR, shB;
 			m_oStream >> shB >> shR >> shT >> shL;
 
-			MoveTo(shL, shT);
-			LineTo(shR, shT);
-			LineTo(shR, shB);
-			LineTo(shL, shB);
-			ClosePath();
+                        std::wcout << shB * 96 / 25.4 << std::endl;
+                        std::wcout << shB * 25.4 / 96 << std::endl;
+
+                        MoveTo(shL, shT);
+                        LineTo(shR, shT);
+                        LineTo(shR, shB);
+                        LineTo(shL, shB);
+
+                        ClosePath();
 			DrawPath(true, true);
 
-			m_pDC->SetCurPos((shL + shR) / 2, (shT + shB) / 2);
+                        m_pDC->SetCurPos((shL + shR) / 2, (shT + shB) / 2);
 		}
 		void Read_META_ROUNDRECT()
 		{
@@ -1273,17 +1293,17 @@ namespace MetaFile
 		void Read_META_TEXTOUT()
 		{
                     LOG_TRACE
-			short shStringLength;
+                        unsigned short shStringLength;
 			m_oStream >> shStringLength;
 
-			if (shStringLength <= 0)
+                        if (shStringLength == 0)
 				return;
 
-			unsigned char* pString = new unsigned char[shStringLength + 1];
+                        unsigned char* pString = new unsigned char[shStringLength];
 			if (!pString)
 				return SetError();
 
-			pString[shStringLength] = 0x00;
+//			pString[shStringLength] = 0x00;
 			m_oStream.ReadBytes(pString, shStringLength);
 
 			if (shStringLength & 1)
@@ -1291,7 +1311,7 @@ namespace MetaFile
 
 			short shX, shY;
 			m_oStream >> shY >> shX;
-			DrawText(pString, shStringLength, shX, shY, NULL);
+                        DrawText(pString, shStringLength, shX, shY, NULL);
 			delete[] pString;
 		}
 		void Read_META_CREATEBRUSHINDIRECT()
@@ -1299,6 +1319,7 @@ namespace MetaFile
                     LOG_TRACE
 			TWmfLogBrush oLogBrush;
 			m_oStream >> oLogBrush;
+
 			CWmfBrush* pBrush = new CWmfBrush(oLogBrush);
 			if (!pBrush)
 				return SetError();
@@ -1874,155 +1895,19 @@ namespace MetaFile
                     m_oStream >> uiRemainingBytes;
                     m_oStream >> uiEnhancedMetafileDataSize;
 
-//                    std::wcout << L"----------------------" << std::endl;
-//                    std::wcout << ushByteCount << std::endl;
-//                    std::wcout << uiCommentIdentifier << std::endl;
-//                    std::wcout << uiCommentType << std::endl;
-//                    std::wcout << uiVersion << std::endl;
-//                    std::wcout << uiBunting << std::endl;
-//                    std::wcout << uiCommentRecordCount << std::endl;
-//                    std::wcout << uiCurrentRecordSize << std::endl;
-//                    std::wcout << uiRemainingBytes << std::endl;
-//                    std::wcout << uiEnhancedMetafileDataSize << std::endl;
-//                    std::wcout << L"----------------------" << std::endl;
-
+                    m_unRecordSize = uiEnhancedMetafileDataSize;
                     if (uiCommentIdentifier == 0x43464D57 &&
                         uiCommentType       == 0x00000001 &&
                         uiVersion           == 0x00010000 &&
                         uiBunting           == 0x00000000 &&
                         uiCurrentRecordSize <= 0x00002000)
                     {
-                        unsigned int ulSize, ulType;
+                        m_oEmfFile = new CEmfFile;
+                        m_oEmfFile->SetStream(m_oStream.GetCurPtr(), uiCurrentRecordSize);
+                        m_oEmfFile->Scan();
 
-                        m_oStream >> ulType;
-                        m_oStream >> ulSize;
+//                        m_oBoundingBox = *(oEmf.GetDCBounds());
 
-                        switch (ulType)
-                        {
-                                //-----------------------------------------------------------
-                                // 2.3.1 Bitmap
-                                //-----------------------------------------------------------
-                                case EMR_ALPHABLEND:        LOGGING(L"EMR_ALPHABLEND"); break;
-                                case EMR_BITBLT:            LOGGING(L"EMR_BITBLT"); break;
-                                case EMR_STRETCHDIBITS:     LOGGING(L"EMR_STRETCHDIBITS"); break;
-                                case EMR_SETDIBITSTODEVICE: LOGGING(L"EMR_SETDIBITSTODEVICE"); break;
-                                case EMR_STRETCHBLT:        LOGGING(L"EMR_STRETCHBLT"); break;
-                                        //-----------------------------------------------------------
-                                        // 2.3.2 Clipping
-                                        //-----------------------------------------------------------
-                                case EMR_EXCLUDECLIPRECT:   LOGGING(L"EMR_EXCLUDECLIPRECT"); break;
-                                case EMR_EXTSELECTCLIPRGN:  LOGGING(L"EMR_EXTSELECTCLIPRGN"); break;
-                                case EMR_INTERSECTCLIPRECT: LOGGING(L"EMR_INTERSECTCLIPRECT"); break;
-                                case EMR_SELECTCLIPPATH:    LOGGING(L"EMR_SELECTCLIPPATH"); break;
-                                case EMR_SETMETARGN:        LOGGING(L"EMR_SETMETARGN"); break;
-                                        //-----------------------------------------------------------
-                                        // 2.3.4 Control
-                                        //-----------------------------------------------------------
-                                case EMR_HEADER: LOGGING(L"EMR_HEADER"); break;
-                                case EMR_EOF:    LOGGING(L"EMR_EOF"); break;
-                                        //-----------------------------------------------------------
-                                        // 2.3.5 Drawing
-                                        //-----------------------------------------------------------
-                                case EMR_ANGLEARC:          LOGGING(L"EMR_ANGLEARC"); break;
-                                case EMR_ARC:               LOGGING(L"EMR_ARC"); break;
-                                case EMR_ARCTO:             LOGGING(L"EMR_ARCTO"); break;
-                                case EMR_CHORD:             LOGGING(L"EMR_CHORD"); break;
-                                case EMR_ELLIPSE:           LOGGING(L"EMR_ELLIPSE"); break;
-                                case EMR_EXTTEXTOUTA:       LOGGING(L"EMR_EXTTEXTOUTA"); break;
-                                case EMR_EXTTEXTOUTW:       LOGGING(L"EMR_EXTTEXTOUTW"); break;
-                                case EMR_FILLPATH:          LOGGING(L"EMR_FILLPATH"); break;
-                                case EMR_LINETO:            LOGGING(L"EMR_LINETO"); break;
-                                case EMR_PIE:               LOGGING(L"EMR_PIE"); break;
-                                case EMR_POLYBEZIER:        LOGGING(L"EMR_POLYBEZIER"); break;
-                                case EMR_POLYBEZIER16:      LOGGING(L"EMR_POLYBEZIER16"); break;
-                                case EMR_POLYBEZIERTO:      LOGGING(L"EMR_POLYBEZIERTO"); break;
-                                case EMR_POLYBEZIERTO16:    LOGGING(L"EMR_POLYBEZIERTO16"); break;
-                                case EMR_POLYDRAW:          LOGGING(L"EMR_POLYDRAW"); break;
-                                case EMR_POLYDRAW16:        LOGGING(L"EMR_POLYDRAW16"); break;
-                                case EMR_POLYGON:           LOGGING(L"EMR_POLYGON"); break;
-                                case EMR_POLYGON16:         LOGGING(L"EMR_POLYGON16"); break;
-                                case EMR_POLYLINE:          LOGGING(L"EMR_POLYLINE"); break;
-                                case EMR_POLYLINE16:        LOGGING(L"EMR_POLYLINE16"); break;
-                                case EMR_POLYLINETO:        LOGGING(L"EMR_POLYLINETO"); break;
-                                case EMR_POLYLINETO16:      LOGGING(L"EMR_POLYLINETO16"); break;
-                                case EMR_POLYPOLYGON:       LOGGING(L"EMR_POLYPOLYGON"); break;
-                                case EMR_POLYPOLYGON16:     LOGGING(L"EMR_POLYPOLYGON16"); break;
-                                case EMR_POLYPOLYLINE:      LOGGING(L"EMR_POLYPOLYLINE"); break;
-                                case EMR_POLYPOLYLINE16:    LOGGING(L"EMR_POLYPOLYLINE16"); break;
-                                case EMR_POLYTEXTOUTA:      LOGGING(L"EMR_POLYTEXTOUTA"); break;
-                                case EMR_POLYTEXTOUTW:      LOGGING(L"EMR_POLYTEXTOUTW"); break;
-                                case EMR_RECTANGLE:         LOGGING(L"EMR_RECTANGLE"); break;
-                                case EMR_ROUNDRECT:         LOGGING(L"EMR_ROUNDRECT"); break;
-                                case EMR_SETPIXELV:         LOGGING(L"EMR_SETPIXELV"); break;
-                                case EMR_SMALLTEXTOUT:      LOGGING(L"EMR_SMALLTEXTOUT"); break;
-                                case EMR_STROKEANDFILLPATH: LOGGING(L"EMR_STROKEANDFILLPATH"); break;
-                                case EMR_STROKEPATH:        LOGGING(L"EMR_STROKEPATH"); break;
-                                        //-----------------------------------------------------------
-                                        // 2.3.7 Object Creation
-                                        //-----------------------------------------------------------
-                                case EMR_CREATEBRUSHINDIRECT:     LOGGING(L"EMR_CREATEBRUSHINDIRECT"); break;
-                                case EMR_CREATEDIBPATTERNBRUSHPT: LOGGING(L"EMR_CREATEDIBPATTERNBRUSHPT"); break;
-                                case EMR_CREATEPALETTE:           LOGGING(L"EMR_CREATEPALETTE"); break;
-                                case EMR_CREATEPEN:               LOGGING(L"EMR_CREATEPEN"); break;
-                                case EMR_EXTCREATEFONTINDIRECTW:  LOGGING(L"EMR_EXTCREATEFONTINDIRECTW"); break;
-                                case EMR_EXTCREATEPEN:            LOGGING(L"EMR_EXTCREATEPEN"); break;
-                                        //-----------------------------------------------------------
-                                        // 2.3.8 Object Manipulation
-                                        //-----------------------------------------------------------
-                                case EMR_SELECTOBJECT:  LOGGING(L"EMR_SELECTOBJECT"); break;
-                                case EMR_DELETEOBJECT:  LOGGING(L"EMR_DELETEOBJECT"); break;
-                                case EMR_SELECTPALETTE: LOGGING(L"EMR_SELECTPALETTE"); break;
-                                        //-----------------------------------------------------------
-                                        // 2.3.10 Path Bracket
-                                        //-----------------------------------------------------------
-                                case EMR_BEGINPATH:   LOGGING(L"EMR_BEGINPATH"); break;
-                                case EMR_ENDPATH:     LOGGING(L"EMR_ENDPATH"); break;
-                                case EMR_CLOSEFIGURE: LOGGING(L"EMR_CLOSEFIGURE"); break;
-                                case EMR_FLATTENPATH: LOGGING(L"EMR_FLATTENPATH"); break;
-                                case EMR_WIDENPATH:   LOGGING(L"EMR_WIDENPATH"); break;
-                                case EMR_ABORTPATH:   LOGGING(L"EMR_ABORTPATH"); break;
-                                        //-----------------------------------------------------------
-                                        // 2.3.11 State
-                                        //-----------------------------------------------------------
-                                case EMR_MOVETOEX:          LOGGING(L"EMR_MOVETOEX"); break;
-                                case EMR_SETARCDIRECTION:   LOGGING(L"EMR_SETARCDIRECTION"); break;
-                                case EMR_SAVEDC:            LOGGING(L"EMR_SAVEDC"); break;
-                                case EMR_RESTOREDC:         LOGGING(L"EMR_RESTOREDC"); break;
-                                case EMR_SETTEXTCOLOR:      LOGGING(L"EMR_SETTEXTCOLOR"); break;
-                                case EMR_SETTEXTALIGN:      LOGGING(L"EMR_SETTEXTALIGN"); break;
-                                case EMR_SETBKMODE:         LOGGING(L"EMR_SETBKMODE"); break;
-                                case EMR_SETMITERLIMIT:     LOGGING(L"EMR_SETMITERLIMIT"); break;
-                                case EMR_SETPOLYFILLMODE:   LOGGING(L"EMR_SETPOLYFILLMODE"); break;
-                                case EMR_SETMAPMODE:        LOGGING(L"EMR_SETMAPMODE"); break;
-                                case EMR_SETWINDOWORGEX:    LOGGING(L"EMR_SETWINDOWORGEX"); break;
-                                case EMR_SETWINDOWEXTEX:    LOGGING(L"EMR_SETWINDOWEXTEX"); break;
-                                case EMR_SETVIEWPORTORGEX:  LOGGING(L"EMR_SETVIEWPORTORGEX"); break;
-                                case EMR_SETVIEWPORTEXTEX:  LOGGING(L"EMR_SETVIEWPORTEXTEX"); break;
-                                case EMR_SETBKCOLOR:        LOGGING(L"EMR_SETBKCOLOR"); break;
-                                case EMR_SETSTRETCHBLTMODE: LOGGING(L"EMR_SETSTRETCHBLTMODE"); break;
-                                case EMR_SETICMMODE:        LOGGING(L"EMR_SETICMMODE"); break;
-                                case EMR_SETROP2:           LOGGING(L"EMR_SETROP2"); break;
-                                case EMR_REALIZEPALETTE:    LOGGING(L"EMR_REALIZEPALETTE"); break;
-                                case EMR_SETLAYOUT:         LOGGING(L"EMR_SETLAYOUT"); break;
-                                case EMR_SETBRUSHORGEX:     LOGGING(L"EMR_SETBRUSHORGEX"); break;
-                                        //-----------------------------------------------------------
-                                        // 2.3.12 Transform
-                                        //-----------------------------------------------------------
-                                case EMR_SETWORLDTRANSFORM: LOGGING(L"EMR_MODIFYWORLDTRANSFORM"); break;
-                                case EMR_MODIFYWORLDTRANSFORM: LOGGING(L"EMR_MODIFYWORLDTRANSFORM"); break;
-                                        //-----------------------------------------------------------
-                                        // Неподдерживаемые записи
-                                        //-----------------------------------------------------------
-                                case EMR_GDICOMMENT: LOGGING(L"EMR_GDICOMMENT"); break;
-                                        //-----------------------------------------------------------
-                                        // Неизвестные записи
-                                        //-----------------------------------------------------------
-                                default:
-                                {
-                                        LOGGING(L"UNKNOWN");
-                                        break;
-                                }
-                        }
                     }
 
                 }
@@ -2151,8 +2036,7 @@ namespace MetaFile
                     LOG_TRACE
                 }
 
-	private:
-
+        private:
 		unsigned int   m_unRecordSize;
 		unsigned int   m_unRecordPos;
 
@@ -2168,6 +2052,8 @@ namespace MetaFile
 		bool           m_bFirstPoint;
 
 		TXForm         m_oTransform;
+
+                CEmfFile*      m_oEmfFile;
 	};
 }
 

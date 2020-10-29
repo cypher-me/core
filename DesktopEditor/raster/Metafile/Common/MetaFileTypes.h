@@ -297,10 +297,10 @@ namespace MetaFile
 
 	struct TRect
 	{
-		int  nLeft;
-		int  nTop;
-		int  nRight;
-		int  nBottom;
+                double  nLeft;
+                double  nTop;
+                double  nRight;
+                double  nBottom;
 
 		TRect();
 		TRect& operator=(TWmfRect& oRect);
