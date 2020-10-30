@@ -375,28 +375,28 @@ namespace MetaFile
 			}
 			case MM_LOMETRIC: // 1 unit = 0.1mm
 			{
-				double dPixel = 0.1 * 72 / 25.4;
+                double dPixel = 0.1 * 96 / 25.4;
 				SetPixelWidth(dPixel);
 				SetPixelHeight(dPixel);
 				break;
 			}
 			case MM_HIMETRIC: // 1 unit = 0.01mm
 			{
-				double dPixel = 0.01 * 72 / 25.4;
+                double dPixel = 0.01 * 96 / 25.4;
 				SetPixelWidth(dPixel);
 				SetPixelHeight(dPixel);
 				break;
 			}
 			case MM_LOENGLISH: // 1 unit = 0.01 inch
 			{
-				double dPixel = 0.01 * 72;
+                double dPixel = 0.01 * 96;
 				SetPixelWidth(dPixel);
 				SetPixelHeight(dPixel);
 				break;
 			}
 			case MM_HIENGLISH: // 1 unit = 0.001 inch
 			{
-				double dPixel = 0.001 * 72;
+                double dPixel = 0.001 * 96;
 				SetPixelWidth(dPixel);
 				SetPixelHeight(dPixel);
 				break;
@@ -518,8 +518,8 @@ namespace MetaFile
 			double dPixelX = (double)m_oViewport.w / (double)m_oWindow.w;
 			double dPixelY = (double)m_oViewport.h / (double)m_oWindow.h;
 
-			SetPixelWidth(dPixelX);
-			SetPixelHeight(dPixelY);
+            SetPixelWidth((dPixelX) >= 1 ? dPixelX : 1);
+            SetPixelHeight((dPixelY) >= 1 ? dPixelY : 1);
 		}
 
 		return true;

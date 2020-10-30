@@ -74,13 +74,13 @@ namespace MetaFile
 			m_pRenderer = pRenderer;
 
 			TRect* pBounds = m_pFile->GetDCBounds();
-			int nL = pBounds->nLeft;
-			int nR = pBounds->nRight;
-			int nT = pBounds->nTop;
-			int nB = pBounds->nBottom;
+                        double nL = pBounds->nLeft;
+                        double nR = pBounds->nRight;
+                        double nT = pBounds->nTop;
+                        double nB = pBounds->nBottom;
 
-			m_dScaleX = (nR - nL <= 0) ? 1 : m_dW / (double)(nR - nL);
-			m_dScaleY = (nB - nT <= 0) ? 1 : m_dH / (double)(nB - nT);
+                        m_dScaleX = (nR - nL <= 1) ? 1 : m_dW / (nR - nL);
+                        m_dScaleY = (nB - nT <= 1) ? 1 : m_dH / (nB - nT);
 
 			m_bStartedPath = false;
 
@@ -115,8 +115,8 @@ namespace MetaFile
 				int nT = pBounds->nTop;
 				int nB = pBounds->nBottom;
 
-				m_dScaleX = (nR - nL <= 0) ? 1 : m_dW / (double)(nR - nL);
-				m_dScaleY = (nB - nT <= 0) ? 1 : m_dH / (double)(nB - nT);
+                                m_dScaleX = (nR - nL <= 1) ? 1 : m_dW / (double)(nR - nL);
+                                m_dScaleY = (nB - nT <= 1) ? 1 : m_dH / (double)(nB - nT);
 			}
 		}
 		void End()
@@ -202,7 +202,7 @@ namespace MetaFile
 			if (lLogicalFontHeight < 0.01)
 				lLogicalFontHeight = 18;
 
-			double dFontHeight = fabs(lLogicalFontHeight * m_dScaleY / 25.4 * 72);
+                        double dFontHeight = fabs(lLogicalFontHeight * m_dScaleY / 25.4 * 96);
 
                         std::wstring wsFaceName = pFont->GetFaceName();
 			m_pRenderer->put_FontName(wsFaceName);
@@ -230,21 +230,18 @@ namespace MetaFile
 
 			double dFontCharSpace = m_pFile->GetCharSpace() * m_dScaleX * m_pFile->GetPixelWidth();
 
-                        if (dFontCharSpace == 0)
-                            dFontCharSpace = lLogicalFontHeight * 5;
-
                         m_pRenderer->put_FontCharSpace(dFontCharSpace);
 			CFontManager* pFontManager = m_pFile->GetFontManager();
-			if (pFontManager)
-			{
-				pFontManager->LoadFontByName(wsFaceName, dFontHeight, lStyle, 72, 72);
-				pFontManager->SetCharSpacing(dFontCharSpace * 72 / 25.4);
 
-//                double dMmToPt = 25.4 / 96;
-                double dMmToPt = 1;
+                        if (pFontManager)
+			{
+                                pFontManager->LoadFontByName(wsFaceName, dFontHeight, lStyle, 96, 96);
+                                pFontManager->SetCharSpacing(dFontCharSpace * 96 / 25.4);
 
                 double dFHeight = dFontHeight;
                 double dFDescent = dFontHeight;
+                double dMmToPt = 25.4 / 96;
+
                 if (pFontManager->m_pFont)
                 {
                     dFHeight  *= pFontManager->m_pFont->GetHeight() / pFontManager->m_pFont->m_lUnits_Per_Em * dMmToPt;
@@ -274,12 +271,12 @@ namespace MetaFile
 					fW = (float)dTempTextW;
 				}
 				else
-				{
+                                {
                                         pFontManager->LoadString1(wsText, 0, 0);
 					TBBox oBox = pFontManager->MeasureString2();
-					fL = (float)dMmToPt * (oBox.fMinX);
-					fW = (float)dMmToPt * (oBox.fMaxX - oBox.fMinX);
-				}
+                                        fL = (float)dMmToPt * (oBox.fMinX);
+                                        fW = (float)dMmToPt * (oBox.fMaxX - oBox.fMinX);
+                                }
 
 				// Просчитаем положение подчеркивания
 				pFontManager->GetUnderline(&fUndX1, &fUndY1, &fUndX2, &fUndY2, &fUndSize);
@@ -291,11 +288,11 @@ namespace MetaFile
 				fUndX2 = fL + fW;
 
 
-				fT = (float)-dFAscent;
+                                fT = (float)-dFAscent;
 				fH = (float)dFHeight;
 			}
 
-			TPointD oTextPoint = TranslatePoint(_dX, _dY);
+                        TPointD oTextPoint = TranslatePoint(_dX, _dY);
 			double dX = oTextPoint.x;
 			double dY = oTextPoint.y;
 
@@ -399,18 +396,20 @@ namespace MetaFile
 
                         // Для начала нарисуем фон текста
                         // Нужно подделать
-                        if (OPAQUE == m_pFile->GetTextBgMode() && FALSE)
+                        if (OPAQUE == m_pFile->GetTextBgMode())
                         {
                                 m_pRenderer->put_BrushType(c_BrushTypeSolid);
                                 m_pRenderer->put_BrushAlpha1(255);
                                 m_pRenderer->put_BrushColor1(m_pFile->GetTextBgColor());
 
+                                double dMmToPt = 25.4 / 96;
+
                                 m_pRenderer->BeginCommand(c_nPathType);
                                 m_pRenderer->PathCommandStart();
-                                m_pRenderer->PathCommandMoveTo(dX + fL, dY + fT);
-                                m_pRenderer->PathCommandLineTo(dX + fL + fW, dY + fT);
-                                m_pRenderer->PathCommandLineTo(dX + fL + fW, dY + fT + fH);
-                                m_pRenderer->PathCommandLineTo(dX + fL, dY + fT + fH);
+                                m_pRenderer->PathCommandMoveTo(dX + fL - dMmToPt, dY + fT - (dY + fT) / 3);
+                                m_pRenderer->PathCommandLineTo(dX + fL + fW, dY + fT - (dY + fT) / 3);
+                                m_pRenderer->PathCommandLineTo(dX + fL + fW, dY + fT + fH + (dY + fT) / 3);
+                                m_pRenderer->PathCommandLineTo(dX + fL - dMmToPt, dY + fT + fH + (dY + fT) / 3);
                                 m_pRenderer->PathCommandClose();
                                 m_pRenderer->DrawPath(c_nWindingFillMode);
                                 m_pRenderer->EndCommand(c_nPathType);
@@ -682,8 +681,9 @@ namespace MetaFile
 		TPointD TranslatePoint(double dX, double dY)
 		{
 			TPointD oPoint;
-			oPoint.x = m_dScaleX * dX + m_dX;
-			oPoint.y = m_dScaleY * dY + m_dY;
+
+                        oPoint.x = m_dScaleX * dX + m_dX;
+                        oPoint.y = m_dScaleY * dY + m_dY;
 			return oPoint;
 		}
 		bool UpdateBrush()
@@ -843,7 +843,7 @@ namespace MetaFile
 
 				double dDpiX;
 				m_pRenderer->get_DpiX(&dDpiX);
-				double dPixelW = dDpiX > 1 ? 25.4 / dDpiX : 25.4 / 72;
+                                double dPixelW = dDpiX > 1 ? 25.4 / dDpiX : 25.4 / 96;
 
 				double dDashOff = 0;
 				double* pDashPattern = NULL;

@@ -84,7 +84,6 @@ namespace MetaFile
 
         TRectD       GetBounds()
 		{
-//            TRect  oBoundsBox = (NULL == m_oEmfFile) ?  GetBoundingBox() : *(m_oEmfFile->GetDCBounds());
             TRect  oBoundsBox = GetBoundingBox();
             TRectD oBounds = oBoundsBox;
 			if (IsPlaceable())
@@ -94,7 +93,8 @@ namespace MetaFile
 			}
 			else
 			{
-				// TODO:
+                                double dLogicalToMM = 25.4 / 96;
+                                oBounds *= dLogicalToMM;
 			}
 			return oBounds;
 		}
@@ -486,8 +486,8 @@ namespace MetaFile
 		}
 		void DrawText(const unsigned char* pString, unsigned int unCharsCount, short _shX, short _shY, short* pDx)
 		{
-			int nX = _shX;
-			int nY = _shY;
+                        int nX = _shX;
+                        int nY = _shY;
 
 			if (m_pDC->GetTextAlign() & TA_UPDATECP)
 			{
@@ -559,23 +559,23 @@ namespace MetaFile
 					pdDx = new double[unCharsCount];
 					if (pdDx)
 					{
-						int nCurX = nX;
-						double dCurX = dX;
+                                                int nCurX = nX;
+                                                double dCurX = dX;
 						for (unsigned int unCharIndex = 0; unCharIndex < unCharsCount; unCharIndex++)
 						{
-							int nX1 = nCurX + pDx[unCharIndex];
+                                                        int nX1 = nCurX + pDx[unCharIndex];
 							double dX1, dY1;
 							TranslatePoint(nX1, nY, dX1, dY1);
 
-							pdDx[unCharIndex] = dX1 - dCurX;
+                                                        pdDx[unCharIndex] = dX1 - dCurX;
 
-							nCurX = nX1;
-							dCurX = dX1;
+                                                        nCurX = nX1;
+                                                        dCurX = dX1;
 						}
 					}
 				}
 
-				m_pOutput->DrawString(wsText, unCharsCount, dX, dY, pdDx);
+                                m_pOutput->DrawString(wsText, unCharsCount, dX, dY, pdDx);
 
 				if (pdDx)
 					delete[] pdDx;
@@ -729,31 +729,28 @@ namespace MetaFile
 				m_pDC->SetCurPos(nX, nY);
 		}
 		void RegisterPoint(short shX, short shY)
-		{
-                    const double dX = 25.4f * shX / 96;
-                    const double dY = 25.4f * shY / 96;
-
+                {
 			if (m_bFirstPoint)
 			{
-                                m_oBoundingBox.nLeft   = dX;
-                                m_oBoundingBox.nRight  = dX;
-                                m_oBoundingBox.nTop    = dY;
-                                m_oBoundingBox.nBottom = dY;
+                                m_oBoundingBox.nLeft   = 0;
+                                m_oBoundingBox.nRight  = shX;
+                                m_oBoundingBox.nTop    = 0;
+                                m_oBoundingBox.nBottom = shY;
 				m_bFirstPoint = false;
 			}
 			else
 			{
-                                if (dX < m_oBoundingBox.nLeft)
-                                        m_oBoundingBox.nLeft = dX;
-                                else if (dX > m_oBoundingBox.nRight)
-                                        m_oBoundingBox.nRight = dX;
+                                if (shX < m_oBoundingBox.nLeft)
+                                        m_oBoundingBox.nLeft = shX;
+                                else if (shX > m_oBoundingBox.nRight)
+                                        m_oBoundingBox.nRight = shX;
 
-                                if (dY < m_oBoundingBox.nTop)
-                                        m_oBoundingBox.nTop = dY;
-                                else if (dY > m_oBoundingBox.nBottom)
-                                        m_oBoundingBox.nBottom = dY;
+                                if (shY < m_oBoundingBox.nTop)
+                                        m_oBoundingBox.nTop = shY;
+                                else if (shY > m_oBoundingBox.nBottom)
+                                        m_oBoundingBox.nBottom = shY;
 			}
-		}
+                }
 		bool ReadImage(unsigned short ushColorUsage, BYTE** ppBgraBuffer, unsigned int* pulWidth, unsigned int* pulHeight)
 		{
 			unsigned int unRemainBytes = GetRecordRemainingBytesCount();
@@ -1045,11 +1042,11 @@ namespace MetaFile
 			if (ushFwOptions & ETO_CLIPPED || ushFwOptions & ETO_OPAQUE)
 				m_oStream >> oRectangle;
 
-			unsigned char* pString = new unsigned char[shStringLength + 1];
+                        unsigned char* pString = new unsigned char[shStringLength + 1];
 			if (!pString)
 				return SetError();
 
-			pString[shStringLength] = 0x00;
+                        pString[shStringLength] = 0x00;
 			m_oStream.ReadBytes(pString, shStringLength);
 
 			short* pDx = NULL;
@@ -1079,7 +1076,7 @@ namespace MetaFile
 				}
 			}
 
-			DrawText(pString, shStringLength, shX, shY, pDx);
+                        DrawText(pString, shStringLength, shX, shY, NULL);
 
 			if (pString)
 				delete[] pString;
@@ -1243,16 +1240,14 @@ namespace MetaFile
 			short shL, shT, shR, shB;
 			m_oStream >> shB >> shR >> shT >> shL;
 
-                        std::wcout << shB * 96 / 25.4 << std::endl;
-                        std::wcout << shB * 25.4 / 96 << std::endl;
-
                         MoveTo(shL, shT);
                         LineTo(shR, shT);
                         LineTo(shR, shB);
                         LineTo(shL, shB);
 
                         ClosePath();
-			DrawPath(true, true);
+
+                        DrawPath(true, true);
 
                         m_pDC->SetCurPos((shL + shR) / 2, (shT + shB) / 2);
 		}
@@ -1299,11 +1294,11 @@ namespace MetaFile
                         if (shStringLength == 0)
 				return;
 
-                        unsigned char* pString = new unsigned char[shStringLength];
+                        unsigned char* pString = new unsigned char[shStringLength + 1];
 			if (!pString)
 				return SetError();
 
-//			pString[shStringLength] = 0x00;
+                        pString[shStringLength] = 0x00;
 			m_oStream.ReadBytes(pString, shStringLength);
 
 			if (shStringLength & 1)
@@ -1311,6 +1306,12 @@ namespace MetaFile
 
 			short shX, shY;
 			m_oStream >> shY >> shX;
+
+                        double dPxToMM = 25.4 / 96;
+
+                        shY *= dPxToMM;
+                        shX *= dPxToMM;
+
                         DrawText(pString, shStringLength, shX, shY, NULL);
 			delete[] pString;
 		}
@@ -1324,7 +1325,7 @@ namespace MetaFile
 			if (!pBrush)
 				return SetError();
 
-			m_oPlayer.RegisterObject((CWmfObjectBase*)pBrush);
+                        m_oPlayer.RegisterObject((CWmfObjectBase*)pBrush);
 		}
 		void Read_META_CREATEFONTINDIRECT()
 		{
@@ -1371,6 +1372,7 @@ namespace MetaFile
 				return SetError();
 
 			m_oStream >> pPen;
+
 			m_oPlayer.RegisterObject((CWmfObjectBase*)pPen);
 		}
 		void Read_META_CREATEREGION()
@@ -1616,8 +1618,9 @@ namespace MetaFile
 		void Read_META_SETTEXTALIGN()
 		{
                     LOG_TRACE
-			unsigned short ushTextAlign;
+                        unsigned short ushTextAlign, ushReserved;
 			m_oStream >> ushTextAlign;
+                        m_oStream >> ushReserved;
 			m_pDC->SetTextAlign(ushTextAlign);
 			UpdateOutputDC();
 		}
@@ -1680,6 +1683,7 @@ namespace MetaFile
                 void  Read_META_ESCAPE()
 		{
                     LOG_TRACE
+                            return;
 			unsigned short ushEscapeFunction;
                         m_oStream >> ushEscapeFunction;
 

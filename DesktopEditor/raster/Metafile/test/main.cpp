@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
 
     MetaFile::IMetaFile* pMetafile = MetaFile::Create(pFonts);
     pMetafile->LoadFromFile(sPathInputFile.c_str());
-    pMetafile->ConvertToRaster(sPathOutputFile.c_str(), 4, 750);
+    pMetafile->ConvertToRaster(sPathOutputFile.c_str(), 4, -1);
     pMetafile->Release();
 
     pFonts->Release();

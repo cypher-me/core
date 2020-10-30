@@ -112,7 +112,6 @@ namespace MetaFile
     const int c_lMetaEmf = 0x02;
     const int c_lMetaSvg = 0x04;
     const int c_lMetaSvm = 0x05;
-    const int c_lMetaWmfAndEmf = 0x06;
 
     class GRAPHICS_DECL IMetaFile : public NSBase::CBaseRefCounter
     {

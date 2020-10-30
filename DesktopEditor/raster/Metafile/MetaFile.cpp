@@ -271,7 +271,7 @@ namespace MetaFile
 				dH = -dH;
 
             if (nWidth < 0) nWidth = (int)(dW * 96 / 25.4);
-            nHeight = (int)(dH * 96 / 25.4);
+            nHeight = (int)((double)nWidth * dH / dW);
         }
 
         double dWidth  = 25.4 * nWidth / 96;
@@ -295,7 +295,7 @@ namespace MetaFile
         oFrame.put_Stride(-4 * nWidth);
 
 		oRenderer.CreateFromBgraFrame(&oFrame);
-		oRenderer.SetSwapRGB(false);
+        oRenderer.SetSwapRGB(false);
         oRenderer.put_Width(dWidth);
         oRenderer.put_Height(dHeight);
 
@@ -304,55 +304,4 @@ namespace MetaFile
 		oFrame.SaveFile(wsOutFilePath, unFileType);
 		RELEASEINTERFACE(pFontManager);
 	}
-
-    void CMetaFile::ConvertToRaster()
-    {
-        CFontManager *pFontManager = (CFontManager*)m_pAppFonts->GenerateFontManager();
-        CFontsCache* pFontCache = new CFontsCache();
-        pFontCache->SetStreams(m_pAppFonts->GetStreams());
-        pFontManager->SetOwnerCache(pFontCache);
-
-        CGraphicsRenderer oRenderer;
-        oRenderer.SetFontManager(pFontManager);
-
-
-        double dX, dY, dW, dH;
-        GetBounds(&dX, &dY, &dW, &dH);
-
-        if (dW < 0)
-            dW = -dW;
-        if (dH < 0)
-            dH = -dH;
-
-        const int nWidth = (int)(dW * 96 / 25.4);
-        const int nHeight = (int)(dH * 96 / 25.4);
-
-        BYTE* pBgraData = new BYTE[nWidth * nHeight * 4];
-        if (!pBgraData)
-            return;
-
-        _UINT32 alfa = 0xffffff;
-        //дефолтный тон должен быть прозрачным, а не белым
-        //memset(pBgraData, 0xff, nWidth * nHeight * 4);
-//        for (int i = 0; i < nWidth * nHeight; i++)
-//        {
-//            ((_UINT32*)pBgraData)[i] = alfa;
-//        }
-        CBgraFrame oFrame;
-        oFrame.put_Data(pBgraData);
-        oFrame.put_Width(nWidth);
-        oFrame.put_Height(nHeight);
-        oFrame.put_Stride(-4 * nWidth);
-
-        oRenderer.CreateFromBgraFrame(&oFrame);
-        oRenderer.SetSwapRGB(false);
-        oRenderer.put_Width(nWidth);
-        oRenderer.put_Height(nHeight);
-
-        DrawOnRenderer(&oRenderer, 0, 0, nWidth, nHeight);
-
-//        oFrame.SaveFile(wsOutFilePath, unFileType);
-//        RELEASEINTERFACE(pFontManager);
-    }
-
 }

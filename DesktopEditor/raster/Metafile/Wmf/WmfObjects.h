@@ -116,8 +116,8 @@ namespace MetaFile
                     Facename[3] = 'a';
                     Facename[4] = 'l';
 
-                    Height = 5;
-                    Width = 10;
+                    Height = 3;
+                    Width = 0;
                     Escapement = 0;
                     Orientation = 0;
                     Weight = 400;
