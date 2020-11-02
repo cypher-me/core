@@ -746,8 +746,7 @@ namespace MetaFile
 					double dX, dY, dX1, dY1;
 					TranslatePoint(nX, nY, dX, dY);
 					TranslatePoint(nX + nW, nY + nH, dX1, dY1);
-
-					m_pOutput->DrawBitmap(dX, dY, fabs(dX1 - dX), fabs(dY1 - dY), pBgra, unWidth, unHeight);
+					m_pOutput->DrawBitmap(dX, dY, dX1 - dX, dY1 - dY, pBgra, unWidth, unHeight);
 				}
 
 				if (pBgra)
@@ -1568,7 +1567,7 @@ namespace MetaFile
 		{
 			short shX, shY;
 			m_oStream >> shY >> shX;
-	    	m_pDC->SetWindowExt(fabs(shX), fabs(shY));
+	    	m_pDC->SetWindowExt(shX, shY);
 			UpdateOutputDC();
 		}
 		void Read_META_SETWINDOWORG()
