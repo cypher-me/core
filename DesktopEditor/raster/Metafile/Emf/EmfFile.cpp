@@ -190,6 +190,7 @@ static const struct ActionNamesEmf
     void CEmfFile::PlayMetaFile()
 	{
         LOG_TRACE
+
 		if (!m_oStream.IsValid())
 			SetError();
 
@@ -208,13 +209,13 @@ static const struct ActionNamesEmf
             if (m_oStream.IsEof())
                 break;
             if (m_oStream.CanRead() < 8)
-				return SetError();
+                return SetError();
 
 			m_oStream >> ulType;
 			m_oStream >> ulSize;
 
             if (ulSize < 1)
-				continue;
+                continue;
 
 			m_ulRecordPos	= m_oStream.Tell();
             m_ulRecordSize	= ulSize - 8;
@@ -252,7 +253,7 @@ static const struct ActionNamesEmf
 					// 2.3.4 Control
 					//-----------------------------------------------------------
 				case EMR_HEADER: Read_EMR_HEADER(); break;
-				case EMR_EOF:    Read_EMR_EOF(); bEof = true; break;
+                case EMR_EOF:    Read_EMR_EOF(); bEof = true; break;
 					//-----------------------------------------------------------
 					// 2.3.5 Drawing
 					//-----------------------------------------------------------
@@ -262,7 +263,7 @@ static const struct ActionNamesEmf
 				case EMR_CHORD:             Read_EMR_CHORD(); break;
 				case EMR_ELLIPSE:           Read_EMR_ELLIPSE(); break;
 				case EMR_EXTTEXTOUTA:       Read_EMR_EXTTEXTOUTA(); break;
-				case EMR_EXTTEXTOUTW:       Read_EMR_EXTTEXTOUTW(); break;
+                case EMR_EXTTEXTOUTW:       Read_EMR_EXTTEXTOUTW(); break;
 				case EMR_FILLPATH:          Read_EMR_FILLPATH(); break;
 				case EMR_LINETO:            Read_EMR_LINETO(); break;
 				case EMR_PIE:				Read_EMR_PIE(); break;
@@ -343,6 +344,7 @@ static const struct ActionNamesEmf
 					//-----------------------------------------------------------
 				case EMR_SETWORLDTRANSFORM: Read_EMR_SETWORLDTRANSFORM(); break;
 				case EMR_MODIFYWORLDTRANSFORM: Read_EMR_MODIFYWORLDTRANSFORM(); break;
+
 					//-----------------------------------------------------------
 					// Неподдерживаемые записи
 					//-----------------------------------------------------------
@@ -352,8 +354,9 @@ static const struct ActionNamesEmf
 					//-----------------------------------------------------------
 				default:
 				{
+                    LOGGING(ulType)
 					Read_EMR_UNKNOWN();
-					break;
+                    break;
 				}
 			}
 
@@ -530,7 +533,6 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::DrawText(std::wstring& wsString, unsigned int unCharsCount, int _nX, int _nY, int* pnDx, int iGraphicsMode)
 	{
-        LOGGING(wsString)
 		int nX = _nX;
 		int nY = _nY;
 
@@ -658,6 +660,8 @@ static const struct ActionNamesEmf
 			return SetError();
 
 		std::wstring wsText = NSStringExt::CConverter::GetUnicodeFromUTF16((unsigned short*)oText.OutputString, oText.Chars);
+
+        LOGGING(wsText)
 
 		unsigned int unLen = 0;
 		int* pDx = NULL;
@@ -987,7 +991,7 @@ static const struct ActionNamesEmf
 	{
         LOG_TRACE
 		// Неизвестные и нереализованные записи мы пропускаем
-		m_oStream.Skip(m_ulRecordSize);
+        m_oStream.Skip(m_ulRecordSize);
 	}
 	void CEmfFile::Read_EMR_SAVEDC()
 	{
@@ -1060,7 +1064,7 @@ static const struct ActionNamesEmf
 	void CEmfFile::Read_EMR_SELECTOBJECT()
 	{
         LOG_TRACE
-		unsigned int ulObjectIndex;
+		unsigned int ulObjectIndex;        
 		m_oStream >> ulObjectIndex;
 
 		m_oPlayer.SelectObject(ulObjectIndex);
@@ -1069,15 +1073,15 @@ static const struct ActionNamesEmf
 	void CEmfFile::Read_EMR_EXTCREATEFONTINDIRECTW()
 	{
         LOG_TRACE
-		unsigned int unSize = m_ulRecordSize - 4;
-		bool bFixedLength = unSize <= 0x0140 ? true : false;
+        unsigned int unSize = m_ulRecordSize - 4;
+        bool bFixedLength = unSize <= 0x0140 ? true : false;
 
-		unsigned int ulIndex;						
-		CEmfLogFont* pFont = new CEmfLogFont(bFixedLength);
+        unsigned int ulIndex;
+        CEmfLogFont* pFont = new CEmfLogFont(bFixedLength);
 		if (!pFont)
 			return SetError();
 
-		m_oStream >> ulIndex;
+        m_oStream >> ulIndex;
 		m_oStream >> *pFont;
 
 		m_oPlayer.RegisterObject(ulIndex, (CEmfObjectBase*)pFont);
@@ -1321,7 +1325,7 @@ static const struct ActionNamesEmf
         LOG_TRACE
 		unsigned int ulICMMode;
 		m_oStream >> ulICMMode;
-	}
+    }
 	void CEmfFile::Read_EMR_CREATEDIBPATTERNBRUSHPT()
 	{
         LOG_TRACE
@@ -1483,7 +1487,7 @@ static const struct ActionNamesEmf
 		TEmfPointL oOrigin;
 		m_oStream >> oOrigin;
 
-		// TODO: реализовать
+        // TODO: реализовать
 	}		
 	void CEmfFile::Read_EMR_ANGLEARC()
 	{
@@ -2006,6 +2010,12 @@ static const struct ActionNamesEmf
 		TEmfRectL oBox;
 		m_oStream >> oBox;
 
+        if (GetPen()->GetStyle() == 5)
+        {
+            oBox.lBottom -= 96 / 25.4;
+            oBox.lRight -= 96 / 25.4;
+        }
+
 		if (AD_COUNTERCLOCKWISE == m_pDC->GetArcDirection())
 		{
 			MoveTo(oBox.lLeft, oBox.lTop);
@@ -2020,7 +2030,7 @@ static const struct ActionNamesEmf
 			LineTo(oBox.lRight, oBox.lBottom);
 			LineTo(oBox.lLeft, oBox.lBottom);
 		}
-		ClosePath();
+        ClosePath();
 		DrawPath(true, true);
 	}
 	void CEmfFile::Read_EMR_ROUNDRECT()

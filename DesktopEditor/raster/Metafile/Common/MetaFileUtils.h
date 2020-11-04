@@ -103,11 +103,11 @@ namespace MetaFile
 		};
 		unsigned int   ReadULong()
 		{
-			if (pCur + 4 >= pEnd)
-				return 0;
+                        if (pCur + 4 >= pEnd)
+                                return 0;
 
 			unsigned int unResult = (unsigned int)((pCur[0] << 0) | ((pCur[1]) << 8) | ((pCur[2]) << 16) | ((pCur[3]) << 24));
-			pCur += 4;
+                        pCur += 4;
 			return unResult;
 		};
 		double         ReadDouble()
@@ -173,14 +173,14 @@ namespace MetaFile
 				pBuffer[ulIndex] = ReadShort();
 			}
 		}
-		void           ReadBytes(unsigned int*  pBuffer, unsigned int ulSize)
+                void           ReadBytes(unsigned int*  pBuffer, unsigned int ulSize)
 		{
 			size_t ulRemainSize = (pEnd - pCur) / 4;
 			size_t ulFinalSize  = (ulRemainSize > ulSize ? ulSize : ulRemainSize);
 
 			for (size_t ulIndex = 0; ulIndex < ulFinalSize; ulIndex++)
 			{
-				pBuffer[ulIndex] = ReadULong();
+                                pBuffer[ulIndex] = ReadULong();
 			}
 		}
 		CDataStream& operator>>(unsigned char&  nValue)
@@ -291,12 +291,12 @@ namespace MetaFile
 		}
 		CDataStream& operator>>(TEmfEmrText& oText)
 		{
-			*this >> oText.Reference;
-			*this >> oText.Chars;
-			*this >> oText.offString;
-			*this >> oText.Options;
-			*this >> oText.Rectangle;
-			*this >> oText.offDx;
+                        *this >> oText.Reference;   // Координаты опорной точки
+                        *this >> oText.Chars;       // количество символов в строке
+                        *this >> oText.offString;   // Смещение строки от начала EMR_EXTTEXTOUTW
+                        *this >> oText.Options;     // Указывает используется ли поле Rectangle
+                        *this >> oText.Rectangle;
+                        *this >> oText.offDx;       // задает смещение массива межсимвольных интервалов в байтах отначало записи EMR_EXTTEXTOUTW
 
 			oText.OutputString = NULL;
 			oText.OutputDx     = NULL;
@@ -306,9 +306,20 @@ namespace MetaFile
 		CDataStream& operator>>(TEmfExtTextoutW& oText)
 		{
 			*this >> oText.Bounds;
-			*this >> oText.iGraphicsMode;
-			*this >> oText.exScale;
-			*this >> oText.eyScale;
+
+                        do
+                        {
+                            do
+                            {
+                                *this >> oText.iGraphicsMode;
+                            }while(oText.iGraphicsMode != 1 && oText.iGraphicsMode != 2);
+
+                            *this >> oText.exScale;
+                            *this >> oText.eyScale;
+
+                        }while ((oText.iGraphicsMode != 1 && oText.iGraphicsMode != 2) ||
+                                 oText.exScale <= 0 ||
+                                 oText.eyScale <= 0);
 
                         ReadEmrTextW(oText.wEmrText, 36); // 8 + 28 (8 - тип и размер, 28 - размер данной структуры)
 			return *this;
@@ -675,10 +686,10 @@ namespace MetaFile
 		}
 		CDataStream& operator>>(TWmfColor& oColor)
 		{
-                        *this >> oColor.a;
-                        *this >> oColor.b;
+                        *this >> oColor.r;
                         *this >> oColor.g;
-			*this >> oColor.r;
+                        *this >> oColor.b;
+                        *this >> oColor.a;
 
 			return *this;
 		}
@@ -965,7 +976,7 @@ namespace MetaFile
 			// Читаем OutputString
 			const unsigned int unCharsCount = oText.Chars;
 			int nSkip = oText.offString - (unOffset + 40); // 40 - размер структуры TEmfEmrText 
-			Skip(nSkip);
+                        Skip(nSkip);
 			T* pString = new T[unCharsCount + 1];
 			if (pString)
 			{

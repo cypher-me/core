@@ -155,19 +155,13 @@ namespace MetaFile
 
 		pRenderer->BeginCommand(c_nImageType);
 
-		if (c_lMetaWmf == m_lType)
+        if (c_lMetaWmf == m_lType)
 		{
 
             CMetaFileRenderer oWmfOut(&m_oWmfFile, pRenderer, dX, dY, dWidth, dHeight);
             m_oWmfFile.SetOutputDevice((IOutputDevice*)&oWmfOut);
             m_oWmfFile.PlayMetaFile();
-//            if (m_oWmfFile.ExistsEmf())
-//            {
-//                CMetaFileRenderer oEmfOut(m_oWmfFile.GetEmfFile(), pRenderer, dX, dY, dWidth, dHeight);
-//                m_oEmfFile.SetOutputDevice((IOutputDevice*)&oEmfOut);
-//                m_oWmfFile.GetEmfFile()->PlayMetaFile();
-//                m_lType = c_lMetaEmf;
-//            }
+
 		}
 		else if (c_lMetaEmf == m_lType)
 		{

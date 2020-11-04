@@ -126,7 +126,7 @@ namespace MetaFile
 				m_oStream >> unSize;
 				m_oStream >> ushType;
 
-				m_unRecordSize = unSize * 2; // Размер указан в WORD
+                                m_unRecordSize = unSize * 2; // Размер указан в WORD
 
 				switch (ushType)
 				{
@@ -223,7 +223,7 @@ namespace MetaFile
 					//-----------------------------------------------------------
 					default:
 					{
-						//std::cout << ushType << " ";
+                                                LOGGING(ushType)
 						Read_META_UNKNOWN();
 						break;
 					}
@@ -800,6 +800,7 @@ namespace MetaFile
 		void Read_META_UNKNOWN()
 		{
                     LOG_TRACE
+                    m_oStream.Skip(m_unRecordSize);
                 }
 		void Read_META_UNSUPPORTED()
 		{
@@ -1683,7 +1684,6 @@ namespace MetaFile
                 void  Read_META_ESCAPE()
 		{
                     LOG_TRACE
-                            return;
 			unsigned short ushEscapeFunction;
                         m_oStream >> ushEscapeFunction;
 
@@ -1899,19 +1899,16 @@ namespace MetaFile
                     m_oStream >> uiRemainingBytes;
                     m_oStream >> uiEnhancedMetafileDataSize;
 
-                    m_unRecordSize = uiEnhancedMetafileDataSize;
                     if (uiCommentIdentifier == 0x43464D57 &&
                         uiCommentType       == 0x00000001 &&
                         uiVersion           == 0x00010000 &&
                         uiBunting           == 0x00000000 &&
-                        uiCurrentRecordSize <= 0x00002000)
+                        uiCurrentRecordSize <= 0x00002000 &&
+                        ushByteCount        == uiCurrentRecordSize + 34)
                     {
                         m_oEmfFile = new CEmfFile;
-                        m_oEmfFile->SetStream(m_oStream.GetCurPtr(), uiCurrentRecordSize);
-                        m_oEmfFile->Scan();
-
-//                        m_oBoundingBox = *(oEmf.GetDCBounds());
-
+                        m_oEmfFile->SetStream(m_oStream.GetCurPtr(), uiEnhancedMetafileDataSize);
+                        m_oEmfFile->PlayMetaFile();
                     }
 
                 }
