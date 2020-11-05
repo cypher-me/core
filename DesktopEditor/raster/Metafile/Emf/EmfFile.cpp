@@ -199,7 +199,6 @@ static const struct ActionNamesEmf
 		bool bEof = false;
 
 		unsigned int ulRecordIndex	= 0;
-		unsigned int m_ulRecordPos	= 0;
 
 		if (m_pOutput)
 			m_pOutput->Begin();
@@ -207,30 +206,54 @@ static const struct ActionNamesEmf
 		do
 		{
             if (m_oStream.IsEof())
+            {
+                LOGGING(L"EOF_1")
                 break;
+            }
             if (m_oStream.CanRead() < 8)
+            {
+                LOGGING(L"ERROR_1")
                 return SetError();
+            }
+
+            if ((unsigned int)m_oStream.GetCurPtr() % 2 == 1)
+                m_oStream.Skip(1);
 
 			m_oStream >> ulType;
+
+            if (ulType < EMR_MIN || ulType > EMR_MAX)
+                continue;
+
 			m_oStream >> ulSize;
 
             if (ulSize < 1)
-                continue;
-
-			m_ulRecordPos	= m_oStream.Tell();
-            m_ulRecordSize	= ulSize - 8;
-
-			if (ulType < EMR_MIN || ulType > EMR_MAX)
             {
-                if (ENHMETA_SIGNATURE != m_oHeader.ulSignature || 0x00010000 != m_oHeader.ulVersion)
-                    return SetError();
-                else
-                    break;
+                LOGGING(L"SIZE < 1")
+                continue;
             }
 
-			if (0 == ulRecordIndex && EMR_HEADER != ulType)
-				return SetError();
+            m_ulRecordPos	= m_oStream.Tell();
+            m_ulRecordSize	= ulSize - 8;
 
+//			if (ulType < EMR_MIN || ulType > EMR_MAX)
+//            {
+//                if (ENHMETA_SIGNATURE != m_oHeader.ulSignature || 0x00010000 != m_oHeader.ulVersion)
+//                {
+//                    LOGGING(L"ERROR_2")
+//                    return SetError();
+//                }
+//                else
+//                {
+//                    LOGGING(L"BREAK")
+//                    break;
+//                }
+//            }
+
+			if (0 == ulRecordIndex && EMR_HEADER != ulType)
+            {
+                LOGGING(L"ERROR_3")
+				return SetError();
+            }
 			switch (ulType)
 			{
 				//-----------------------------------------------------------
@@ -291,6 +314,7 @@ static const struct ActionNamesEmf
 				case EMR_SMALLTEXTOUT:      Read_EMR_SMALLTEXTOUT(); break;
 				case EMR_STROKEANDFILLPATH: Read_EMR_STROKEANDFILLPATH(); break;
 				case EMR_STROKEPATH:        Read_EMR_STROKEPATH(); break;
+                case EMR_FRAMERGN:          Read_EMR_FRAMERGN(); break;
 					//-----------------------------------------------------------
 					// 2.3.7 Object Creation
 					//-----------------------------------------------------------
@@ -361,20 +385,28 @@ static const struct ActionNamesEmf
 			}
 
 			if (bEof)
+            {
+                LOGGING(L"EOF")
 				break;
+            }
+            int need_skip = m_ulRecordSize - (m_oStream.Tell() - m_ulRecordPos);
 
-			int need_skip = m_ulRecordSize - (m_oStream.Tell() - m_ulRecordPos);
-			m_oStream.Skip(need_skip);
+            if (need_skip > 0)
+            {
+                m_oStream.Skip(need_skip);
 			
 #ifdef _DEBUG
-            if ( need_skip != 0 && !m_pOutput)
-            {
-                std::wstring name = actionNamesEmf[ulType].actionName;
+                if ( need_skip != 0 && !m_pOutput)
+                {
+                    std::wstring name = actionNamesEmf[ulType].actionName;
 
-                std::wcout << name << L"\t\t(" << ulType << L")\t; skiped = " << need_skip << L"\n";
-            }
+                    std::wcout << name << L"\t\t(" << ulType << L")\t; skiped = " << need_skip << L"\n";
+                }
 #endif
+            }
 			ulRecordIndex++;
+            m_ulRecordPos = 0;
+            m_ulRecordSize = 0;
 
 		} while (!CheckError());
 
@@ -667,6 +699,7 @@ static const struct ActionNamesEmf
 		int* pDx = NULL;
 		if (oText.OutputDx && oText.Chars)
 		{
+            LOGGING(oText.Chars)
 			// Здесь мы эмулируем конвертацию Utf16 в Utf32, чтобы правильно получить массив pDx
 			pDx = new int[oText.Chars];
 			unLen = 0;
@@ -990,9 +1023,9 @@ static const struct ActionNamesEmf
 	void CEmfFile::Read_EMR_UNKNOWN()
 	{
         LOG_TRACE
-		// Неизвестные и нереализованные записи мы пропускаем
         m_oStream.Skip(m_ulRecordSize);
-	}
+		// Неизвестные и нереализованные записи мы пропускаем
+    }
 	void CEmfFile::Read_EMR_SAVEDC()
 	{
         LOG_TRACE
@@ -1363,6 +1396,13 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_SETBKCOLOR()
 	{
+        if (m_ulRecordSize > 4)
+        {
+            m_oStream.SeekBack(4);
+            m_ulRecordSize = 0;
+            m_ulRecordPos = 0;
+            return;
+        }
         LOG_TRACE
 		TEmfColor oColor;
 		m_oStream >> oColor;
@@ -1460,6 +1500,9 @@ static const struct ActionNamesEmf
 	void CEmfFile::Read_EMR_REALIZEPALETTE()
 	{
         LOG_TRACE
+        m_ulRecordPos = 0;
+        m_ulRecordSize = 0;
+        m_oStream.SeekBack(4);
 		// TODO: Реализовать
 	}
 	void CEmfFile::Read_EMR_INTERSECTCLIPRECT()
@@ -1637,12 +1680,10 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_POLYBEZIERTO()
 	{
-        LOG_TRACE
 		Read_EMR_POLYBEZIERTO_BASE<TEmfPointL>();
 	}
 	void CEmfFile::Read_EMR_POLYBEZIERTO16()
 	{
-        LOG_TRACE
 		Read_EMR_POLYBEZIERTO_BASE<TEmfPointS>();
 	}
 	template<typename T>void CEmfFile::Read_EMR_POLYBEZIERTO_BASE()
@@ -1666,12 +1707,10 @@ static const struct ActionNamesEmf
 	}
 	void CEmfFile::Read_EMR_POLYDRAW()
 	{
-        LOG_TRACE
 		Read_EMR_POLYDRAW_BASE<TEmfPointL>();
 	}
 	void CEmfFile::Read_EMR_POLYDRAW16()
 	{
-        LOG_TRACE
 		Read_EMR_POLYDRAW_BASE<TEmfPointS>();
 	}
 	template<typename T>void CEmfFile::Read_EMR_POLYDRAW_BASE()
@@ -2142,6 +2181,14 @@ static const struct ActionNamesEmf
 		{
 			m_pPath->Draw(m_pOutput, true, false);
 			RELEASEOBJECT(m_pPath);
-		}
-	}
+        }
+    }
+
+    void CEmfFile::Read_EMR_FRAMERGN()
+    {
+        LOG_TRACE
+        m_ulRecordPos = 0;
+        m_ulRecordSize = 0;
+        m_oStream.Skip(32);
+    }
 }

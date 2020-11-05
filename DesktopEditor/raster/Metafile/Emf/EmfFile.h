@@ -329,10 +329,12 @@ namespace MetaFile
 		void Read_EMR_SMALLTEXTOUT();
 		void Read_EMR_STROKEANDFILLPATH();
 		void Read_EMR_STROKEPATH();
+                void Read_EMR_FRAMERGN();
 	private:
 
 		TEmfHeader        m_oHeader;
 		unsigned int      m_ulRecordSize;
+                unsigned int      m_ulRecordPos;
 		CEmfDC*           m_pDC;
 		CEmfPlayer        m_oPlayer;
 		CEmfPath*         m_pPath;
