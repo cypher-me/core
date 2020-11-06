@@ -272,10 +272,11 @@ static const struct ActionNamesEmf
 				case EMR_INTERSECTCLIPRECT: Read_EMR_INTERSECTCLIPRECT(); break;
 				case EMR_SELECTCLIPPATH:    Read_EMR_SELECTCLIPPATH(); break;
 				case EMR_SETMETARGN:        Read_EMR_SETMETARGN(); break;
+                case EMR_OFFSETCLIPRGN:     Read_EMR_OFFSETCLIPRGN(); break;
 					//-----------------------------------------------------------
 					// 2.3.4 Control
 					//-----------------------------------------------------------
-				case EMR_HEADER: Read_EMR_HEADER(); break;
+                case EMR_HEADER: Read_EMR_HEADER(); break;
                 case EMR_EOF:    Read_EMR_EOF(); bEof = true; break;
 					//-----------------------------------------------------------
 					// 2.3.5 Drawing
@@ -387,6 +388,7 @@ static const struct ActionNamesEmf
 			if (bEof)
             {
                 LOGGING(L"EOF")
+                std::wcout << L"STOP_2: " << m_oStream.CanRead() << std::endl;
 				break;
             }
             int need_skip = m_ulRecordSize - (m_oStream.Tell() - m_ulRecordPos);
@@ -761,8 +763,16 @@ static const struct ActionNamesEmf
 
 	void CEmfFile::Read_EMR_HEADER()
 	{
+        if (m_oHeader.ulSize != 0)
+        {
+            m_ulRecordPos = 0;
+            m_ulRecordSize = 0;
+            m_oStream.SeekBack(4);
+            return;
+        }
+
         LOG_TRACE
-		m_oStream >> m_oHeader.oBounds;
+        m_oStream >> m_oHeader.oBounds;
 		m_oStream >> m_oHeader.oFrame;
 		m_oStream >> m_oHeader.ulSignature;
 		m_oStream >> m_oHeader.ulVersion;
@@ -2186,9 +2196,42 @@ static const struct ActionNamesEmf
 
     void CEmfFile::Read_EMR_FRAMERGN()
     {
+        if (m_ulRecordSize < 32)
+        {
+            m_ulRecordPos = 0;
+            m_ulRecordSize = 0;
+            m_oStream.SeekBack(4);
+            return;
+        }
         LOG_TRACE
         m_ulRecordPos = 0;
         m_ulRecordSize = 0;
         m_oStream.Skip(32);
+    }
+
+    void CEmfFile::Read_EMR_OFFSETCLIPRGN()
+    {
+        if (m_ulRecordSize != 8)
+        {
+            m_ulRecordPos = 0;
+            m_ulRecordSize = 0;
+            m_oStream.SeekBack(4);
+            return;
+        }
+        LOG_TRACE
+        m_oStream.Skip(8);
+    }
+
+    void CEmfFile::Read_EMR_SETMAPPERFLAGS()
+    {
+        if (m_ulRecordSize != 4)
+        {
+            m_ulRecordPos = 0;
+            m_ulRecordSize = 0;
+            m_oStream.SeekBack(4);
+            return;
+        }
+        LOG_TRACE
+        m_oStream.Skip(4);
     }
 }

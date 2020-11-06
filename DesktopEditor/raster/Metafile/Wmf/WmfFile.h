@@ -1907,8 +1907,9 @@ namespace MetaFile
                         ushByteCount        == uiCurrentRecordSize + 34)
                     {
                         m_oEmfFile = new CEmfFile;
-                        m_oEmfFile->SetStream(m_oStream.GetCurPtr(), uiEnhancedMetafileDataSize);
+                        m_oEmfFile->SetStream(m_oStream.GetCurPtr(), uiEnhancedMetafileDataSize * 2);
                         m_oEmfFile->PlayMetaFile();
+                        m_oStream.Skip((unsigned int)(m_oEmfFile->GetCurStreamPtr() - m_oStream.GetCurPtr()));
                     }
 
                 }

@@ -59,6 +59,11 @@ namespace MetaFile
                     m_oStream.SetStream(pBuf, unSize);
                 }
 
+                BYTE* GetCurStreamPtr()
+                {
+                    return m_oStream.GetCurPtr();
+                }
+
 		~CEmfFile()
 		{
 			ClearFile();
@@ -329,7 +334,10 @@ namespace MetaFile
 		void Read_EMR_SMALLTEXTOUT();
 		void Read_EMR_STROKEANDFILLPATH();
 		void Read_EMR_STROKEPATH();
+
                 void Read_EMR_FRAMERGN();
+                void Read_EMR_OFFSETCLIPRGN();
+                void Read_EMR_SETMAPPERFLAGS();
 	private:
 
 		TEmfHeader        m_oHeader;
